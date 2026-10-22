@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Supply Match">
+<meta name="theme-color" content="#1f6f5c">
+<title>Гастер · Supply Match</title>
+<style>
+:root{--bg:#eef2ee;--card:#fff;--ink:#14231c;--mute:#5d6b63;--line:#d5ddd6;--acc:#1f6f5c;--accink:#fff;--warn:#b36b00}
+@media(prefers-color-scheme:dark){:root{--bg:#101a16;--card:#18251f;--ink:#e8f0ea;--mute:#93a39a;--line:#2a3a32;--acc:#4fb89c;--accink:#08241c;--warn:#e0a040}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Georgia,"Times New Roman",serif;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+h1,h2,h3,button,input,select,textarea,nav{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:18px 16px 6px;max-width:860px;margin:0 auto}
+h1{font-size:26px;margin:0;letter-spacing:-.5px}
+header p{margin:2px 0 0;color:var(--mute);font-size:14px}
+nav{display:flex;gap:6px;max-width:860px;margin:10px auto 0;padding:0 16px;overflow-x:auto}
+nav button{flex:1;white-space:nowrap;padding:10px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font-size:15px;cursor:pointer}
+nav button[aria-selected=true]{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+main{max-width:860px;margin:0 auto;padding:14px 16px 60px}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:0 0 12px}
+label{display:block;font:600 13px system-ui;margin:10px 0 4px;color:var(--mute)}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:16px}
+textarea{min-height:80px;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:140px}
+.btn{padding:11px 16px;border:0;border-radius:8px;background:var(--acc);color:var(--accink);font:600 15px system-ui;cursor:pointer;margin-top:12px}
+.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:7px 11px;font-size:13px;margin:8px 6px 0 0}
+.btn:disabled{opacity:.5}
+.mute{color:var(--mute);font-size:14px}.warn{color:var(--warn);font-size:14px}
+h3{margin:0 0 4px;font-size:18px}
+.tag{display:inline-block;font:12px system-ui;border:1px solid var(--line);border-radius:20px;padding:1px 9px;margin-right:6px;color:var(--mute)}
+.msg{white-space:pre-wrap;background:var(--bg);border-radius:8px;padding:10px;margin-top:8px;font-size:15px}
+.bar{height:8px;border-radius:4px;background:var(--line);margin:6px 0}.bar i{display:block;height:100%;border-radius:4px;background:var(--acc)}
+.empty{text-align:center;color:var(--mute);padding:28px 10px}
+</style>
+</head>
+<body>
+<header><h1>Гастер · Supply Match</h1><p>Находит поставщиков кофе и подбирает лучшее предложение с помощью ИИ</p></header>
+<nav role="tablist">
+<button role="tab" data-t="find" aria-selected="true">Поиск</button>
+<button role="tab" data-t="base" aria-selected="false">Моя база <span id="cnt"></span></button>
+<button role="tab" data-t="best" aria-selected="false">Лучшее</button>
+<button role="tab" data-t="set" aria-selected="false">Настройки</button>
+</nav>
+<main>
+<section id="find" class="on">
+<div class="card">
+<div class="row"><div><label for="city">Город</label><input id="city" value="Москва"></div>
+<div><label for="prod">Что нужно</label><input id="prod" value="кофе в зёрнах для кофейни"></div></div>
+<label for="need">Условия (необязательно)</label>
+<input id="need" placeholder="например: от 20 кг в месяц, обжарка под эспрессо, доставка">
+<label><input type="checkbox" id="web" checked style="width:auto"> Искать в интернете (Google Search) — точнее, но медленнее</label>
+<button class="btn" id="go">Найти поставщиков</button>
+<p class="mute" id="st"></p>
+</div>
+<div id="res"></div>
+</section>
+
+<section id="base">
+<div id="list"></div>
+</section>
+
+<section id="best">
+<div class="card">
+<label for="req">Что важно именно вам</label>
+<textarea id="req" placeholder="Бюджет, объём в месяц, вкус, сроки доставки, отсрочка платежа…"></textarea>
+<button class="btn" id="rank">Подобрать лучшие предложения из базы</button>
+<p class="mute" id="st2"></p>
+</div>
+<div id="rk"></div>
+</section>
+
+<section id="set">
+<div class="card">
+<h3>Ключ нейросети (бесплатно)</h3>
+<p class="mute">Приложение использует API Google Gemini. Бесплатный ключ: aistudio.google.com → «Get API key». Карта не нужна. Ключ хранится только на этом устройстве.</p>
+<label for="key">API-ключ</label><input id="key" type="password" autocomplete="off">
+<label for="model">Модель</label><input id="model" value="gemini-2.5-flash">
+<button class="btn" id="save">Сохранить</button>
+<p class="warn">В бесплатном тарифе Google может использовать запросы для улучшения своих продуктов — не отправляйте конфиденциальные данные.</p>
+</div>
+<div class="card">
+<h3>Данные</h3>
+<p class="mute">Копия базы поставщиков — чтобы перенести на другое устройство.</p>
+<button class="btn alt sm" id="exp">Скачать базу</button>
+<label class="btn alt sm" style="display:inline-block;color:var(--ink)">Загрузить базу<input type="file" id="imp" accept=".json" hidden></label>
+</div>
+</section>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S={key:'',model:'gemini-2.5-flash',sup:[]};
+try{Object.assign(S,JSON.parse(localStorage.getItem('gaster')||'{}'))}catch(e){}
+const persist=()=>{try{localStorage.setItem('gaster',JSON.stringify(S))}catch(e){}$('#cnt').textContent=S.sup.length?'('+S.sup.length+')':''};
+let found=[];
+
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));
+  if(b.dataset.t==='base')drawBase();
+});
+
+async function ai(prompt,{json=true,search=false}={}){
+  if(!S.key)throw new Error('Сначала вставьте бесплатный API-ключ во вкладке «Настройки».');
+  const body={contents:[{parts:[{text:prompt}]}]};
+  if(search)body.tools=[{google_search:{}}];else if(json)body.generationConfig={responseMimeType:'application/json'};
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(S.model)+':generateContent',
+    {method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':S.key},body:JSON.stringify(body)});
+  const d=await r.json();
+  if(!r.ok){
+    if(r.status===429)throw new Error('Достигнут бесплатный лимит запросов. Подождите минуту и повторите.');
+    if(r.status===400||r.status===403)throw new Error('Ключ не подошёл или модель недоступна. Проверьте «Настройки».');
+    throw new Error(d.error?.message||'Ошибка '+r.status);
+  }
+  return (d.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('');
+}
+function parse(t){
+  t=t.replace(/```json|```/g,'');
+  const a=t.search(/[\[{]/),b=Math.max(t.lastIndexOf(']'),t.lastIndexOf('}'));
+  return JSON.parse(t.slice(a,b+1));
+}
+
+$('#go').onclick=async()=>{
+  const b=$('#go'),st=$('#st');b.disabled=true;st.textContent='Ищу поставщиков…';$('#res').innerHTML='';
+  const p=`Ты помощник владельца кофейни. Найди до 6 реальных поставщиков: «${$('#prod').value}» в городе «${$('#city').value}».
+Условия клиента: ${$('#need').value||'не указаны'}.
+Верни ТОЛЬКО JSON-массив объектов с полями: name, type (обжарщик/дистрибьютор/импортёр), offer (что предлагают), conditions (известные условия: минимальный заказ, доставка, цены), contact (телефон/почта, если точно известны, иначе ""), site (сайт, если известен, иначе ""), why (почему подходит, 1 фраза).
+Не выдумывай контакты и цены. Если не уверен — оставь поле пустым.`;
+  try{
+    const t=await ai(p,{json:true,search:$('#web').checked});
+    found=parse(t);if(!Array.isArray(found))found=[found];
+    st.textContent='Найдено: '+found.length+'. Это кандидаты — проверьте контакты и цены перед заказом.';
+    drawFound();
+  }catch(e){st.textContent=e.message}
+  b.disabled=false;
+};
+function drawFound(){
+  $('#res').innerHTML=found.map((s,i)=>`<div class="card"><h3>${esc(s.name)}</h3><span class="tag">${esc(s.type)}</span>
+<p>${esc(s.offer)}</p>${s.conditions?`<p class="mute">Условия: ${esc(s.conditions)}</p>`:''}
+${s.contact||s.site?`<p class="mute">${esc(s.contact)} ${esc(s.site)}</p>`:''}<p class="mute">${esc(s.why)}</p>
+<button class="btn sm" data-i="${i}">Добавить в мою базу</button></div>`).join('');
+  $('#res').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    const s=found[b.dataset.i];
+    if(!S.sup.some(x=>x.name===s.name))S.sup.push({...s,id:Date.now()+Math.random(),status:'новый',note:'',city:$('#city').value});
+    persist();b.textContent='В базе ✓';b.disabled=true;
+  });
+}
+
+function drawBase(){
+  const L=$('#list');
+  if(!S.sup.length){L.innerHTML='<div class="empty">База пуста. Найдите поставщиков на вкладке «Поиск» и добавьте их сюда.</div>';return}
+  L.innerHTML=S.sup.map(s=>`<div class="card" data-id="${s.id}"><h3>${esc(s.name)}</h3><span class="tag">${esc(s.type)}</span><span class="tag">${esc(s.city)}</span>
+<p>${esc(s.offer)}</p><p class="mute">${esc(s.conditions)} ${esc(s.contact)} ${esc(s.site)}</p>
+<div class="row"><div><label>Статус</label><select class="stt">${['новый','приглашён','ответил','отказ'].map(o=>`<option${o===s.status?' selected':''}>${o}</option>`).join('')}</select></div>
+<div><label>Заметка</label><input class="nt" value="${esc(s.note)}"></div></div>
+<button class="btn sm inv">Письмо-приглашение</button><button class="btn alt sm del">Удалить</button><div class="out"></div></div>`).join('');
+  L.querySelectorAll('.card').forEach(c=>{
+    const s=S.sup.find(x=>String(x.id)===c.dataset.id);
+    c.querySelector('.stt').onchange=e=>{s.status=e.target.value;persist()};
+    c.querySelector('.nt').onchange=e=>{s.note=e.target.value;persist()};
+    c.querySelector('.del').onclick=()=>{S.sup=S.sup.filter(x=>x!==s);persist();drawBase()};
+    c.querySelector('.inv').onclick=async e=>{
+      const o=c.querySelector('.out');e.target.disabled=true;o.innerHTML='<p class="mute">Пишу письмо…</p>';
+      try{
+        const t=await ai(`Напиши короткое деловое письмо на русском от владельца небольшой кофейни в городе «${s.city}» поставщику «${s.name}» (${s.offer}). Предложи сотрудничество, попроси прайс, минимальный заказ, условия доставки и возможность пробной партии. 5–7 предложений, без выдуманных фактов. Верни только текст письма.`,{json:false});
+        o.innerHTML=`<div class="msg">${esc(t.trim())}</div><button class="btn alt sm cp">Копировать</button>`;
+        o.querySelector('.cp').onclick=async b=>{try{await navigator.clipboard.writeText(t.trim());b.target.textContent='Скопировано ✓'}catch(_){}};
+      }catch(er){o.innerHTML=`<p class="warn">${esc(er.message)}</p>`}
+      e.target.disabled=false;
+    };
+  });
+}
+
+$('#rank').onclick=async()=>{
+  const st=$('#st2'),R=$('#rk');
+  if(!S.sup.length){st.textContent='Сначала добавьте поставщиков в базу.';return}
+  $('#rank').disabled=true;st.textContent='Сравниваю…';R.innerHTML='';
+  const data=S.sup.map(({name,type,offer,conditions,note,status})=>({name,type,offer,conditions,note,status}));
+  try{
+    const t=await ai(`Ты помощник владельца кофейни. Требования клиента: ${$('#req').value||'не указаны'}.
+Поставщики (JSON): ${JSON.stringify(data)}
+Оцени каждого от 0 до 100 по соответствию требованиям и верни ТОЛЬКО JSON: {"ranking":[{"name":"","score":0,"reason":"1–2 фразы"}],"advice":"что уточнить у лучших поставщиков"}. Отсортируй по убыванию. Если данных мало, скажи об этом в reason.`);
+    const d=parse(t);
+    R.innerHTML=(d.ranking||[]).map((x,i)=>`<div class="card"><h3>${i+1}. ${esc(x.name)} — ${esc(x.score)}/100</h3><div class="bar"><i style="width:${Math.max(0,Math.min(100,+x.score||0))}%"></i></div><p>${esc(x.reason)}</p></div>`).join('')
+      +(d.advice?`<div class="card"><h3>Что уточнить</h3><p>${esc(d.advice)}</p></div>`:'');
+    st.textContent='';
+  }catch(e){st.textContent=e.message}
+  $('#rank').disabled=false;
+};
+
+$('#save').onclick=()=>{S.key=$('#key').value.trim();S.model=$('#model').value.trim()||'gemini-2.5-flash';persist();$('#save').textContent='Сохранено ✓';setTimeout(()=>$('#save').textContent='Сохранить',1500)};
+$('#exp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S.sup,null,1)],{type:'application/json'}));a.download='supply-match-base.json';a.click()};
+$('#imp').onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());if(Array.isArray(j)){S.sup=j;persist();drawBase()}}catch(_){}};
+$('#key').value=S.key;$('#model').value=S.model;persist();
+</script>
+</body>
+</html>

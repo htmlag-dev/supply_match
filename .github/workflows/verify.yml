@@ -1,0 +1,69 @@
+name: Verify Supply Match
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: supplymatch
+          POSTGRES_PASSWORD: test-only-password
+          POSTGRES_DB: supplymatch_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 10s
+          --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install -r requirements-server.txt
+      - run: python -m unittest -q
+      - run: python scripts/test_postgres.py
+        env:
+          SUPPLY_MATCH_DATABASE_URL: postgresql://supplymatch:test-only-password@localhost:5432/supplymatch_test
+      - run: node --test tests/theme.test.cjs
+      - run: for file in app/web/*.js; do node --check "$file"; done
+      - run: npm install --ignore-scripts --package-lock=false
+      - run: node scripts/prepare-mobile.mjs
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - run: npm install --ignore-scripts --package-lock=false
+      - run: node scripts/prepare-mobile.mjs
+      - run: ../node_modules/.bin/cap sync android
+        working-directory: mobile
+      - run: ./gradlew assembleDebug
+        working-directory: mobile/android
+      - uses: actions/upload-artifact@v4
+        with:
+          name: supply-match-android-debug
+          path: mobile/android/app/build/outputs/apk/debug/*.apk
+  ios-simulator:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --ignore-scripts --package-lock=false
+      - run: node scripts/prepare-mobile.mjs
+      - run: ../node_modules/.bin/cap sync ios
+        working-directory: mobile
+      - run: xcodebuild -project mobile/ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath mobile/ios/DerivedData CODE_SIGNING_ALLOWED=NO build

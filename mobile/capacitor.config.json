@@ -1,0 +1,8 @@
+{
+  "appId": "com.supplymatch.app",
+  "appName": "Supply Match",
+  "webDir": "www",
+  "android": {"allowMixedContent": false},
+  "ios": {"contentInset": "automatic"},
+  "server": {"androidScheme": "https"}
+}

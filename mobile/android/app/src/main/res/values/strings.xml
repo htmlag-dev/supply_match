@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Supply Match</string>
+    <string name="title_activity_main">Supply Match</string>
+    <string name="package_name">com.supplymatch.app</string>
+    <string name="custom_url_scheme">com.supplymatch.app</string>
+</resources>

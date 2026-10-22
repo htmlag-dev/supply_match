@@ -1,0 +1,26 @@
+supply_match/
+├── main.py                  # запуск: python main.py
+├── requirements.txt         # зависимостей нет
+├── README.md
+├── .gitignore
+│
+├── app/
+│   ├── init.py
+│   ├── config.py            # модель, порт, пути
+│   ├── database.py          # SQLite: поставщики и настройки
+│   ├── server.py            # JSON API и раздача интерфейса
+│   │
+│   ├── services/
+│   │   ├── init.py
+│   │   ├── ai_service.py        # вызов нейросети (Gemini)
+│   │   └── supplier_service.py  # поиск, письма, подбор; промпты вверху
+│   │
+│   └── web/
+│       └── index.html       # интерфейс (поиск, база, лучшее, настройки)
+│
+├── data/
+│   └── .gitkeep             # здесь появится app.db
+│
+└── tests/
+    ├── init.py
+    └── test_services.py

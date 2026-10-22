@@ -1,0 +1,12 @@
+{
+  "name": "supply-match-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@capacitor/core": "8.5.3",
+    "@capacitor/android": "8.5.3",
+    "@capacitor/ios": "8.5.3",
+    "@capacitor/browser": "8.0.5",
+    "@aparajita/capacitor-secure-storage": "8.0.1"
+  }
+}
