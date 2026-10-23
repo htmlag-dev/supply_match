@@ -33,6 +33,9 @@ class LocalAIProcess:
         self.stopping = False
 
     def start(self, auto_setup=True):
+        # The bundled runtime and installer currently support Windows only.
+        if os.name != "nt":
+            return
         root = DATA_DIR / "local-ai"
         model = root / "Qwen3-4B-Q4_K_M.gguf"
         runtime = root / "runtime" / "llama-server.exe"
@@ -47,11 +50,18 @@ class LocalAIProcess:
         self.phase = "loading"
         self.log = (root / "server.log").open("a", encoding="utf-8")
         child_env = {**os.environ, "LLAMA_API_KEY": LOCAL_KEY}
-        self.process = subprocess.Popen([str(runtime), "--model", str(model), "--alias", "supplymatch-qwen3",
-            "--host", "127.0.0.1", "--port", "8766", "--ctx-size", "8192", "--parallel", "1",
-            "--threads", str(min(8, max(2, (os.cpu_count() or 4) // 2))), "--jinja",
-            "--chat-template-kwargs", '{"enable_thinking":false}'],
-            stdout=self.log, stderr=self.log, env=child_env, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        try:
+            self.process = subprocess.Popen([str(runtime), "--model", str(model), "--alias", "supplymatch-qwen3",
+                "--host", "127.0.0.1", "--port", "8766", "--ctx-size", "8192", "--parallel", "1",
+                "--threads", str(min(8, max(2, (os.cpu_count() or 4) // 2))), "--jinja",
+                "--chat-template-kwargs", '{"enable_thinking":false}'],
+                stdout=self.log, stderr=self.log, env=child_env, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        except OSError:
+            self.phase = "error"
+            self.log.close()
+            self.log = None
+            print("Не удалось запустить локальную Qwen3. Приложение продолжает работу без неё.", flush=True)
+            return
         print("Локальная Qwen3 загружается. Первый ответ может потребовать больше времени.", flush=True)
 
     def _install(self):
