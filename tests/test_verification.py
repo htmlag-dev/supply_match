@@ -5,6 +5,7 @@ from app.services.auth_service import AuthService,AuthError,Unauthorized
 
 class VerificationTests(unittest.TestCase):
     def setUp(self):
+        env=patch.dict("os.environ", {"SUPPLY_MATCH_REQUIRE_EMAIL_VERIFICATION":"true"});env.start();self.addCleanup(env.stop)
         self.tmp=tempfile.TemporaryDirectory();self.auth=AuthService(Path(self.tmp.name)/'accounts.enc',secrets.token_bytes(32));self.auth.mailer=Mock();self.auth.mailer.configured.return_value=True
         self.data=dict(email='person@example.com',name='Person',password='unique registration password')
     def tearDown(self):self.tmp.cleanup()

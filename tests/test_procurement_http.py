@@ -45,3 +45,27 @@ class ProcurementHTTPTests(unittest.TestCase):
         self.assertEqual(self.request('/api/procurement/compare','POST',{'comparison_key':'test','quantity':'1'})[0],200)
     def test_public_password_recovery_validation(self):
         self.assertEqual(self.request('/api/auth/reset-password','POST',{'challenge_id':'x','code':'123456','password':'NewPassword1234'},user=None)[0],400)
+
+    def test_registration_without_mail_creates_immediate_session(self):
+        from unittest.mock import patch, Mock
+        self.auth.mailer = Mock()
+        self.auth.mailer.configured.return_value = False
+        data = {'email': 'new@example.test', 'name': 'New', 'password': 'StrongPassword12345!'}
+        with patch.dict('os.environ', {'SUPPLY_MATCH_REQUIRE_EMAIL_VERIFICATION': 'false'}):
+            code, result = self.request('/api/auth/register', 'POST', data, user=None)
+            self.assertEqual(code, 200)
+            self.assertIn('csrf', result)
+            self.assertEqual(result['user']['email_verified'], 0)
+            self.assertNotIn('verification_required', result)
+            self.auth.mailer.send_code.assert_not_called()
+            user = self.auth.login(data)
+            token, _ = self.auth.session(user)
+            self.assertEqual(self.auth.authenticate(token)[0]['id'], user['id'])
+            code, result = self.request('/api/auth/login', 'POST', data, user=None)
+            self.assertEqual(code, 200)
+            self.assertIn('csrf', result)
+            with self.auth.conn() as c:
+                c.execute('UPDATE users SET disabled=1 WHERE id=?', (user['id'],))
+            from app.services.auth_service import Unauthorized
+            with self.assertRaises(Unauthorized):
+                self.auth.authenticate(token)

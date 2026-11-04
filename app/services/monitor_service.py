@@ -10,7 +10,7 @@ class SearchMonitor:
         self.auth=auth;self.stopped=threading.Event();self.thread=None
     def tick(self):
         with self.auth.conn() as c:
-            users=[r['id'] for r in c.execute('SELECT id FROM users WHERE disabled=0 AND email_verified=1')]
+            users=[r['id'] for r in c.execute('SELECT id FROM users WHERE disabled=0 AND (email_verified=1 OR ?=0)', (int(self.auth.requires_email_verification()),))]
         for uid in users:
             if self.stopped.is_set():return
             # Do not create workspaces for accounts that never used the application.

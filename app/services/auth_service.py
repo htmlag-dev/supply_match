@@ -99,7 +99,13 @@ class AuthService:
             if username:c.execute('UPDATE users SET username=? WHERE id=?',(username,uid))
             row=c.execute('SELECT * FROM users WHERE id=?',(uid,)).fetchone()
             return safe_user(row)
+    @staticmethod
+    def requires_email_verification():
+        return os.environ.get("SUPPLY_MATCH_REQUIRE_EMAIL_VERIFICATION", "false").lower() == "true"
+
     def start_registration(self,data):
+        if not self.requires_email_verification():
+            return self.register(data,email_verified=False)
         if not self.mailer.configured():raise AuthError('Почтовый сервис не настроен. Владелец должен подключить SMTP; вход без проверки почты не разрешён.')
         user=self.register(data,email_verified=False)
         return self.begin_verification(user)
@@ -193,7 +199,7 @@ class AuthService:
     def session(self,user,ip="",device=""):
         token=secrets.token_urlsafe(32);csrf=secrets.token_urlsafe(32);now=int(time.time())
         with self.conn() as c:
-            valid=c.execute('SELECT 1 FROM users WHERE id=? AND email_verified=1 AND disabled=0',(user['id'],)).fetchone()
+            valid=c.execute('SELECT 1 FROM users WHERE id=? AND (email_verified=1 OR ?=0) AND disabled=0',(user['id'],int(self.requires_email_verification()))).fetchone()
             if not valid:raise Unauthorized('Подтвердите почту перед входом.')
             c.execute('DELETE FROM sessions WHERE expires<?',(now,))
             c.execute('INSERT INTO sessions(token,user_id,csrf,expires,last_seen,ip_hash,device_hash) VALUES(?,?,?,?,?,?,?)',(digest(token),user['id'],csrf,now+30*86400,now,hmac.new(self.key,ip.encode(),hashlib.sha256).hexdigest(),hmac.new(self.key,device[:512].encode(),hashlib.sha256).hexdigest()))
@@ -203,7 +209,7 @@ class AuthService:
         if not token:raise Unauthorized('Войдите в аккаунт.')
         now=int(time.time())
         with self.conn() as c:
-            row=c.execute('SELECT u.*,s.csrf,s.last_seen FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token=? AND s.expires>? AND u.disabled=0 AND u.email_verified=1',(digest(token),now)).fetchone()
+            row=c.execute('SELECT u.*,s.csrf,s.last_seen FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token=? AND s.expires>? AND u.disabled=0 AND (u.email_verified=1 OR ?=0)',(digest(token),now,int(self.requires_email_verification()))).fetchone()
             if not row:raise Unauthorized('Сессия закончилась. Войдите снова.')
             if now-row['last_seen']>=300:c.execute('UPDATE sessions SET last_seen=? WHERE token=?',(now,digest(token)))
             return safe_user(row),row['csrf']

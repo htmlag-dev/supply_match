@@ -126,9 +126,11 @@ def make_handler(db, service, ai, local_ai=None, auth=None):
                 except Unauthorized:return {'user':None,'providers':auth.providers()}
             if method=='POST' and path in ('/api/auth/register','/api/auth/login'):
                 data=self._body();auth.rate('ip:'+self._client_ip(),30);auth.rate('account:'+str(data.get('email','')).lower(),10)
-                if path.endswith('register'):return auth.start_registration(data)
+                if path.endswith('register'):
+                    result=auth.start_registration(data)
+                    return result if result.get('verification_required') else self._login(result)
                 user=auth.login(data)
-                return self._login(user) if user['email_verified'] else auth.begin_verification(user)
+                return self._login(user) if user['email_verified'] or not auth.requires_email_verification() else auth.begin_verification(user)
             if method=='POST' and path in ('/api/auth/forgot-password','/api/auth/reset-password'):
                 auth.rate('reset-ip:'+self._client_ip(),10,3600)
                 data=self._body()
