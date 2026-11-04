@@ -430,7 +430,9 @@ def make_handler(db, service, ai, local_ai=None, auth=None):
 
 def run(host="127.0.0.1", port=8000, open_browser=True, auto_setup=True):
     if os.environ.get('SUPPLY_MATCH_ENV')=='production':
-        if host!='127.0.0.1' or not os.environ.get('SUPPLY_MATCH_PUBLIC_URL','').startswith('https://'):
+        from app.hosting import render_proxy
+        permitted_bind = host == '127.0.0.1' or (host == '0.0.0.0' and render_proxy())
+        if not permitted_bind or not os.environ.get('SUPPLY_MATCH_PUBLIC_URL','').startswith('https://'):
             raise RuntimeError('Production: нужен HTTPS reverse proxy, SUPPLY_MATCH_PUBLIC_URL и привязка к 127.0.0.1.')
     local_ai = LocalAIProcess()
     auth=AuthService()

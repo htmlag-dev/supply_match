@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: supply-match
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-server.txt
+    startCommand: python scripts/start_render.py
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: SUPPLY_MATCH_ENV
+        value: production
+      - key: SUPPLY_MATCH_ENCRYPTION_KEY
+        generateValue: true
+      - key: SUPPLY_MATCH_DATABASE_URL
+        sync: false
+      - key: SUPPLY_MATCH_BOOTSTRAP_EMAIL
+        sync: false
+      - key: SUPPLY_MATCH_BOOTSTRAP_PASSWORD
+        sync: false
