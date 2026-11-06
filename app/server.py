@@ -1,5 +1,7 @@
 """Локальный HTTP JSON API и интерфейс приложения."""
 import csv
+from contextlib import nullcontext
+from app.features import search_only
 import io
 import json
 import re
@@ -47,7 +49,7 @@ def make_handler(db, service, ai, local_ai=None, auth=None):
                 self.send_header("Access-Control-Allow-Origin", origin)
                 self.send_header("Vary", "Origin")
                 self.send_header("Access-Control-Allow-Credentials", "true")
-                self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-CSRF-Token, X-SupplyMatch-Native")
+                self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-CSRF-Token, X-SupplyMatch-Native, X-SupplyMatch-Web")
                 self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
             self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
             for key,value in getattr(self,"response_headers",[]):
@@ -114,10 +116,19 @@ def make_handler(db, service, ai, local_ai=None, auth=None):
                 except ValueError:pass
             return ip
 
+        def _web_client(self):
+            origin = self.headers.get('Origin', '')
+            return (self.headers.get('X-SupplyMatch-Web') == '1' and bool(origin)
+                    and origin in os.environ.get('SUPPLY_MATCH_ALLOWED_ORIGINS', '').split(','))
+
+        def _search_limit(self):
+            if auth:auth.rate('web-search:' + self.user['id'], 30, 3600)
+
         def _login(self,user):
-            token,csrf=auth.session(user,ip=self._client_ip(),device=self.headers.get('User-Agent',''));self._cookie('sm_session',token)
+            token,csrf=auth.session(user,ip=self._client_ip(),device=self.headers.get('User-Agent',''))
+            if not self._web_client():self._cookie('sm_session',token)
             result={'user':user,'csrf':csrf}
-            if self.headers.get('X-SupplyMatch-Native')=='1':result['session_token']=token
+            if self.headers.get('X-SupplyMatch-Native')=='1' or self._web_client():result['session_token']=token
             return result
 
         def _auth_route(self,method,path):
@@ -192,7 +203,8 @@ def make_handler(db, service, ai, local_ai=None, auth=None):
                 if method=='POST' and path=='/api/catalog/preview':return catalog.import_price_list(self._body())
                 if method=='POST' and path=='/api/catalog/discover':
                     data=self._body()
-                    with access.ai_request():return catalog.discover(data.get('supplier_id'),self._text(data,'query',250))
+                    self._search_limit()
+                    with access.search_request():return catalog.discover(data.get('supplier_id'),self._text(data,'query',250))
                 item_match=re.fullmatch(r'/api/catalog/([a-f0-9]{32})',path)
                 if item_match and method=='PATCH':return catalog.save(self._body(),item_match.group(1))
                 if item_match and method=='DELETE':catalog.delete(item_match.group(1));return {'ok':True}
@@ -214,12 +226,12 @@ def make_handler(db, service, ai, local_ai=None, auth=None):
                 provider_settings = {}
                 for provider, config in PROVIDERS.items():
                     provider_settings[provider] = {**config, "configured_model": db.get_setting("model_" + provider) or (ai.model if provider == ai.provider else config["model"])}
-                return {"has_key": bool(ai.key), "ai_ready": ai.ready, "local_ready": ai.local_ready,
+                return {"search_only": search_only(), "has_key": bool(ai.key), "ai_ready": False if search_only() else ai.ready, "local_ready": False if search_only() else ai.local_ready,
                         "provider": ai.provider, "model": ai.model,
                         "custom_endpoint": db.get_setting("custom_endpoint"), "custom_format": db.get_setting("custom_format", "openai"),
                         "supports_web": ai.supports_web, "providers": provider_settings,
                         "has_search_key": bool(service.web.key), "web_available": service.web.available,
-                        "local_setup": local_ai.status() if local_ai else {"phase": "external", "progress": 0},
+                        "local_setup": local_ai.status() if local_ai and not search_only() else {"phase": "external", "progress": 0},
                         "suppliers": db.list_suppliers(), "billing": billing.state(),
                         "access": access.state(), "purchases": db.list_purchases()}
             if method == "POST" and path == "/api/settings":
@@ -255,6 +267,7 @@ def make_handler(db, service, ai, local_ai=None, auth=None):
                 return {"ok": True}
             if method == "POST" and path == "/api/ai/test":
                 self._body()
+                if search_only():raise ValueError("Эта версия работает без ИИ. Используйте поиск продавцов.")
                 ai.generate("Ответь одним словом: подключено", json_mode=False)
                 return {"ok": True}
             if method == "POST" and path == "/api/search":
@@ -274,7 +287,8 @@ def make_handler(db, service, ai, local_ai=None, auth=None):
                     purpose=self._text(data, "purpose", 200), quantity=self._text(data, "quantity", 200), trade_format=trade_format)
                 if not params["city"] or not params["product"]:
                     raise ValueError("Укажите товар и город доставки.")
-                with access.ai_request():
+                self._search_limit()
+                with access.search_request():
                     result = service.search_with_sources(**params)
                 db.add_history("search", params["product"] + " · " + params["city"], result)
                 return result
@@ -285,12 +299,12 @@ def make_handler(db, service, ai, local_ai=None, auth=None):
                 requirements = self._text(self._body(), "requirements")
                 if not db.list_suppliers():
                     return service.rank(requirements)
-                with access.ai_request():
+                with nullcontext() if search_only() else access.ai_request():
                     result = service.rank(requirements)
                 db.add_history("rank", requirements or "Сравнение предложений", result)
                 return result
             if method == "GET" and path == "/api/history":
-                if not access.state()["limits"]["history"]:
+                if not search_only() and not access.state()["limits"]["history"]:
                     raise ValueError("История доступна в пробной версии и на тарифе Профи.")
                 return db.list_history()
             if method == "POST" and path == "/api/calculate":
@@ -311,7 +325,7 @@ def make_handler(db, service, ai, local_ai=None, auth=None):
                     raise KeyError(sid)
                 if match.group(2) and method == "POST":
                     self._body()
-                    with access.ai_request():
+                    with nullcontext() if search_only() else access.ai_request():
                         return {"text": service.invite_text(sid)}
                 if not match.group(2) and method == "PATCH":
                     db.update_supplier(sid, self._supplier(self._body(), partial=True))
@@ -348,6 +362,7 @@ def make_handler(db, service, ai, local_ai=None, auth=None):
                     cookies=self._cookies()
                     self.session_token=cookies['sm_session'].value if 'sm_session' in cookies else ''
                     bearer=self.headers.get('Authorization','')
+                    if self._web_client():self.session_token=''
                     if bearer.startswith('Session '):self.session_token=bearer[8:]
                     if path.startswith('/auth/'):
                         auth.rate('oauth:'+self.client_address[0],30)
@@ -392,7 +407,7 @@ def make_handler(db, service, ai, local_ai=None, auth=None):
                           "/calculator": "index.html", "/purchases": "index.html", "/appearance": "index.html",
                           "/manifest.webmanifest": "manifest.webmanifest", "/sw.js": "sw.js", "/icon.svg": "icon.svg",
                           "/icon-192.png": "icon-192.png", "/icon-512.png": "icon-512.png",
-                          "/procurement.js": "procurement.js", "/cart.js": "cart.js", "/account.js": "account.js", "/theme-utils.js": "theme-utils.js", "/ambient.js": "ambient.js", "/app.js": "app.js", "/styles.css": "styles.css"}
+                          "/remote-web.js": "remote-web.js", "/procurement.js": "procurement.js", "/cart.js": "cart.js", "/account.js": "account.js", "/theme-utils.js": "theme-utils.js", "/ambient.js": "ambient.js", "/app.js": "app.js", "/styles.css": "styles.css"}
                 if method == "GET" and path in static:
                     filename = static[path]
                     types = {"html": "text/html; charset=utf-8", "css": "text/css; charset=utf-8", "js": "text/javascript; charset=utf-8", "svg": "image/svg+xml", "png": "image/png", "webmanifest": "application/manifest+json"}
@@ -450,7 +465,7 @@ def run(host="127.0.0.1", port=8000, open_browser=True, auto_setup=True):
         import webbrowser
         webbrowser.open(url)
     try:
-        local_ai.start(auto_setup=auto_setup)
+        if not search_only():local_ai.start(auto_setup=auto_setup)
         server.serve_forever()
     except KeyboardInterrupt:
         print("\nОстановлено.")

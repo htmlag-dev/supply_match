@@ -1,5 +1,6 @@
 """Каталог тарифов и заявки. Подключение эквайринга — через PaymentGateway."""
 import re
+from app.features import search_only
 import uuid
 from datetime import datetime, timezone
 from app.services.access_service import AccessService
@@ -33,7 +34,8 @@ class BillingService:
         self.payments = YooKassaGateway(db)
 
     def state(self):
-        return {"plans": PLANS, "current_plan": AccessService(self.db).state()["plan"], "payment_enabled": self.payments.enabled("billing"),
+        plans = [{**plan, 'features': [feature for feature in plan['features'] if 'AI-' not in feature]} for plan in PLANS] if search_only() else PLANS
+        return {"plans": plans, "current_plan": AccessService(self.db).state()["plan"], "payment_enabled": self.payments.enabled("billing"),
                 "orders": self.db.list_orders()}
 
     def checkout(self, data):

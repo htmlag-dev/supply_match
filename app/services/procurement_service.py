@@ -160,7 +160,7 @@ class ProcurementService:
             if row['last_run'] and now-row['last_run'] < 3600:raise ValueError('Повторная проверка доступна через час.')
             c.execute('UPDATE saved_searches SET last_run=?,next_run=? WHERE id=?', (now,now+86400,sid))
         try:
-            with AccessService(self.db).ai_request():
+            with AccessService(self.db).search_request():
                 sources, failures = WebSearchClient(self.db).discover(**json.loads(row['params']),depth='quick')
                 if failures:raise ValueError('Часть поисковых систем недоступна. Проверка не завершена; повторите позже.')
             seen = set(json.loads(row['seen']));fresh = [s for s in sources if s['url'] not in seen]

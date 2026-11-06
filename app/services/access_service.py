@@ -1,5 +1,6 @@
 """Локальные тарифы, пробный период и учёт AI-запросов."""
 from contextlib import contextmanager
+from app.features import search_only
 from datetime import datetime, timedelta, timezone
 
 LIMITS = {"start": {"ai": 5, "suppliers": 20, "history": False},
@@ -27,6 +28,15 @@ class AccessService:
                 "bucket": bucket, "trial_ends_at": trial_end.isoformat(),
                 "trial_days_left": max(0, (trial_end - now).days + (1 if trial_end > now else 0)),
                 "subscription_until": until or None}
+
+    @contextmanager
+    def search_request(self):
+        # Search engines are called without a model; do not debit AI credits.
+        if search_only():
+            yield
+        else:
+            with self.ai_request():
+                yield
 
     @contextmanager
     def ai_request(self):

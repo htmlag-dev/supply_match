@@ -3,12 +3,12 @@ const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = value => new Intl.NumberFormat('ru-RU').format(value) + ' ₽';
-const titles = {projects:'Проекты',monitoring:'Поиски и уведомления',cart:'Корзина',admin:'Администрирование','product-checkout':'Оформление покупки',purchases:'Мои заказы',calculator:'Стоимость покупки',appearance:'Внешний вид',history:'История ИИ',overview:'Обзор',find:'Найти продавцов',base:'Моя база',compare:'Сравнить предложения',pricing:'Тарифы и оплата',checkout:'Оформление тарифа',settings:'Настройки ИИ'};
+const titles = {projects:'Проекты',monitoring:'Поиски и уведомления',cart:'Корзина',admin:'Администрирование','product-checkout':'Оформление покупки',purchases:'Мои заказы',calculator:'Стоимость покупки',appearance:'Внешний вид',history:'История поиска',overview:'Обзор',find:'Найти продавцов',base:'Моя база',compare:'Сравнить предложения',pricing:'Тарифы и оплата',checkout:'Оформление тарифа',settings:'Настройки ИИ'};
 const statusClass = {'новый':'','приглашён':'invited','ответил':'replied','отказ':'declined'};
 let state = null, found = [], period = 'monthly', selectedPlan = 'pro', currentPage = '', letterId = null, deleteId = null;
 let aiPollTimer=null, searchPage=0,lastSearch=null,searchHasMore=false;
 let searchSources=[], searchMode='model', historyItems=[], purchaseToken='', purchaseFingerprint='';
-let apiBase=localStorage.getItem('supplymatch-server') || document.querySelector('meta[name=api-base]')?.content || '';
+let apiBase=window.SupplyMatchWeb?.origin || localStorage.getItem('supplymatch-server') || document.querySelector('meta[name=api-base]')?.content || '';
 let accessToken=sessionStorage.getItem('supplymatch-token') || '';
 const defaultAppearance={theme:'system',accent:'green',density:'comfortable',start:'overview',workspace:'Моё пространство',effects:'aurora',motion:'subtle',glass:true,customBase:'dark',customAccent:'#a4e4b8',customBg:'#10151d',customSurface:'#19212d',customText:'#edf3fa'};
 let appearance={...defaultAppearance};
@@ -17,7 +17,7 @@ applyAppearance();
 let checkoutToken = '', checkoutFingerprint = '', toastTimer;
 function token() { return Array.from(crypto.getRandomValues(new Uint8Array(24)), n=>n.toString(16).padStart(2,'0')).join(''); }
 async function api(path, method='GET', data) {
-  const response = await fetch(apiBase+path, {method, credentials:'include', headers:{...(method==='GET'?{}:{'Content-Type':'application/json'}),...(window.SupplyAccount?.headers()||{})}, body:method==='GET'?undefined:JSON.stringify(data ?? {})});
+  const response = await fetch(apiBase+path, {method, credentials:window.SupplyMatchWeb?'omit':'include', headers:{...(method==='GET'?{}:{'Content-Type':'application/json'}),...(window.SupplyAccount?.headers()||{})}, body:method==='GET'?undefined:JSON.stringify(data ?? {})});
   let result;
   try { result = await response.json(); } catch { throw new Error('Сервер вернул некорректный ответ. Проверьте, что приложение запущено.'); }
   if(response.status===401) window.SupplyAccount?.requireLogin();
@@ -44,7 +44,7 @@ function renderOverview() {
   $('#stat-active').textContent=suppliers.filter(s=>s.status==='приглашён').length;
   $('#stat-replied').textContent=suppliers.filter(s=>s.status==='ответил').length;
   $('#stat-cities').textContent=new Set(suppliers.map(s=>s.city?.trim().toLowerCase()).filter(Boolean)).size;
-  const steps=[state.ai_ready, suppliers.length>0, suppliers.some(s=>s.status==='ответил')];
+  const steps=[state.search_only||state.ai_ready, suppliers.length>0, suppliers.some(s=>s.status==='ответил')];
   ['#step-key','#step-base','#step-reply'].forEach((selector,i)=>{ $(selector).classList.toggle('done',steps[i]); $(selector).textContent=steps[i]?'✓':i+1; });
   $('#progress').textContent=steps.filter(Boolean).length+' / 3';
   $('#recent').innerHTML=suppliers.length?`<div class="recent-row">${suppliers.slice(0,3).map(s=>`<a href="#base" class="recent-item"><span class="supplier-logo">${esc(s.name[0])}</span><div><strong>${esc(s.name)}</strong><small>${esc(s.type || 'Продавец')} · ${esc(s.country || s.city || 'Регион не указан')}</small></div>${badge(s)}<span aria-hidden="true">↗</span></a>`).join('')}</div>`:empty('Здесь будут ваши будущие партнёры','Начните с поиска или добавьте поставщика, с которым уже работаете.','<a class="button secondary" href="#find">Найти первого поставщика →</a>');
@@ -52,7 +52,7 @@ function renderOverview() {
 function renderBase() {
   const query=$('#base-query').value.trim().toLowerCase(), filter=$('#status-filter').value;
   const list=state.suppliers.filter(s=>(!filter || s.status===filter)&&(!query || [s.name,s.city,s.country,s.category,s.trade_format,s.type,s.offer,s.contact,s.note].join(' ').toLowerCase().includes(query)));
-  $('#base-list').innerHTML=list.length?list.map((s,i)=>renderCard(s,i)).join(''):state.suppliers.length?empty('Ничего не найдено','Попробуйте другой запрос или сбросьте фильтр статусов.'):empty('Ваша база пока пуста','Добавьте знакомого поставщика вручную или найдите кандидатов с помощью ИИ.','<a class="button primary" href="#find">Начать поиск →</a>');
+  $('#base-list').innerHTML=list.length?list.map((s,i)=>renderCard(s,i)).join(''):state.suppliers.length?empty('Ничего не найдено','Попробуйте другой запрос или сбросьте фильтр статусов.'):empty('Ваша база пока пуста','Добавьте знакомого поставщика вручную или найдите кандидатов через поиск.','<a class="button primary" href="#find">Начать поиск →</a>');
 }
 function renderFound() {
   if(searchMode==='model') found=found.map(s=>({...s,contact:'',conditions:'',currency:'',unit_price:'',moq:'',lead_time:'',incoterms:'',why:'Кандидат по знаниям модели. Актуальность и коммерческие условия нужно проверить.'}));
@@ -128,7 +128,7 @@ async function loadState(initial=false) {
   $('#web').disabled=!(state.web_available||state.supports_web||state.has_search_key);
   if(initial)$('#web').checked=!$('#web').disabled;
   $('#web-hint').textContent=state.has_search_key?'Подключён Tavily. Найденные страницы анализирует выбранная модель. Поиск расходует квоту Tavily.':'Веб-поиск без ключа: несколько запросов к поисковым системам, реальные ссылки и расширение выдачи. Возможны временные ограничения поисковых систем.';
-  renderOverview(); renderBase(); renderFound(); renderPlans(); renderCheckout(); renderPurchases(); renderAccess();
+  renderOverview(); renderBase(); renderFound(); renderPlans(); renderCheckout(); renderPurchases(); renderAccess(); renderSearchMode();
   if(initial) { $('#provider').value=state.provider; renderProvider(); }
   if(!state.ai_ready && ['loading','downloading'].includes(state.local_setup?.phase)) {
     $('#ai-indicator span').textContent=state.local_setup.phase==='downloading'?'Загрузка ИИ: '+state.local_setup.progress+'%':'ИИ запускается…';
@@ -158,6 +158,7 @@ function route() {
   if(page==='admin') window.SupplyAccount.renderAdmin();
   if(page==='cart') window.SupplyCart?.open(params.get('seller'));
   if(page==='product-checkout') { renderSellerOptions(); if(params.has('seller')) { $('#purchase-seller').value=params.get('seller'); prefillPurchaseSeller(); } updatePurchaseSummary(); }
+  if(page==='settings'&&state.search_only){location.hash='#find';return;}
   if(page==='settings') { $('#provider').value=state.provider; renderProvider(); }
   if(currentPage!==page) { window.scrollTo(0,0); if(currentPage) $('#main').focus({preventScroll:true}); }
   currentPage=page;
@@ -169,7 +170,7 @@ $$('[data-product]').forEach(button=>button.addEventListener('click',()=>$('#pro
 $$('[data-period]').forEach(button=>button.addEventListener('click',()=>{ period=button.dataset.period; renderPlans(); }));
 async function performSearch(append=false){
   if(!append){
-    lastSearch={city:$('#city').value,product:$('#product').value,need:$('#need').value+'\nБюджет: '+$('#budget').value+'\nСостояние: '+$('#condition').value,web:$('#web').checked,country:$('#country').value,category:$('#category').value,purpose:$('#purpose').value,quantity:$('#quantity').value,trade_format:$('#trade-format').value,depth:$('#search-depth').value};
+    lastSearch={city:$('#city').value,product:$('#product').value,need:$('#need').value+'\nБюджет: '+$('#budget').value+'\nСостояние: '+$('#condition').value,web:state.search_only||$('#web').checked,country:$('#country').value,category:$('#category').value,purpose:$('#purpose').value,quantity:$('#quantity').value,trade_format:$('#trade-format').value,depth:$('#search-depth').value};
     searchPage=0;$('#result-query').value='';$('#result-type').value='';$('#result-domain').value='';$('#result-saved').value='';
   }
   if(!lastSearch)return;
@@ -257,12 +258,12 @@ $('#mark-invited').addEventListener('click',async()=>{
 $('#rank-form').addEventListener('submit',async event=>{
   event.preventDefault();
   if(!state.suppliers.length) return status('#rank-status','Сначала добавьте поставщиков в базу.',true);
-  $('#rank-submit').disabled=true; status('#rank-status','Сравниваем предложения. Локальной модели может потребоваться до 4 минут…');
+  $('#rank-submit').disabled=true; status('#rank-status',state.search_only?'Проверяем заполненность условий…':'Сравниваем предложения…');
   try {
     const result=await api('/api/rank','POST',{requirements:$('#requirements').value});
-    $('#ranking').innerHTML=result.ranking.map((r,i)=>`<article class="rank-card"><span class="rank-position">${String(i+1).padStart(2,'0')}</span><div class="rank-body"><h3>${esc(r.name)}</h3><p>${esc(r.reason)}</p></div><div class="rank-score">${esc(r.score)}<small> / 100</small></div></article>`).join('')+(result.advice?`<article class="panel"><h2>Что уточнить перед выбором</h2><p>${esc(result.advice)}</p></article>`:'');
+    $('#ranking').innerHTML=result.ranking.map((r,i)=>`<article class="rank-card"><span class="rank-position">${String(i+1).padStart(2,'0')}</span><div class="rank-body"><h3>${esc(r.name)}</h3><p>${esc(r.reason)}</p></div><div class="rank-score">${esc(r.score)}<small>${state.search_only?'% заполнено':' / 100'}</small></div></article>`).join('')+(result.advice?`<article class="panel"><h2>Что уточнить перед выбором</h2><p>${esc(result.advice)}</p></article>`:'');
     await loadState();
-    status('#rank-status',result.ranking.length?'Сравнение готово. Оценка ИИ ориентировочная и зависит от полноты данных.':'Модель не вернула оценки. Дополните условия поставщиков и повторите.');
+    status('#rank-status',state.search_only?'Сводка готова. Процент отражает заполненность полей, а не надёжность продавца.':result.ranking.length?'Сравнение готово. Оценка ИИ ориентировочная и зависит от полноты данных.':'Модель не вернула оценки. Дополните условия поставщиков и повторите.');
   } catch(error) { status('#rank-status',error.message,true); }
   finally { $('#rank-submit').disabled=false; }
 });
@@ -379,7 +380,7 @@ $('#appearance-reset').addEventListener('click',()=>{appearance={...defaultAppea
 function renderAccess() {
   const a=state.access, label={trial:'Пробная версия',start:'Старт',pro:'Профи'}[a.plan];
   $('#access-banner').hidden=false;
-  $('#access-banner').innerHTML=`<span><strong>${esc(label)}</strong>${a.plan==='trial'?` · осталось ${a.trial_days_left} дн.`:''} · ИИ: ${a.ai_used} / ${a.limits.ai} · База: ${state.suppliers.length} / ${a.limits.suppliers}</span><a href="#pricing">Тарифы →</a>`;
+  $('#access-banner').innerHTML=`<span><strong>${esc(label)}</strong>${a.plan==='trial'?` · осталось ${a.trial_days_left} дн.`:''}${state.search_only?' · Поиск без ИИ':' · ИИ: '+a.ai_used+' / '+a.limits.ai} · База: ${state.suppliers.length} / ${a.limits.suppliers}</span><a href="#pricing">Тарифы →</a>`;
   $('.profile small').textContent=label;
 }
 function updateRateHint() {
@@ -465,7 +466,7 @@ $('#purchase-form').addEventListener('submit',async event=>{
   finally { $('#purchase-submit').disabled=false; }
 });
 async function loadHistory() {
-  if(!state.access.limits.history) { $('#history-list').innerHTML=empty('История входит в Профи','Она также доступна в течение 14 дней пробной версии. Сохранённые результаты остаются в базе.','<a href="#pricing" class="button primary">Посмотреть тарифы →</a>'); return; }
+  if(!state.search_only&&!state.access.limits.history) { $('#history-list').innerHTML=empty('История входит в Профи','Она также доступна в течение 14 дней пробной версии. Сохранённые результаты остаются в базе.','<a href="#pricing" class="button primary">Посмотреть тарифы →</a>'); return; }
   try {
     historyItems=await api('/api/history');
     $('#history-list').innerHTML=historyItems.length?historyItems.map(item=>`<article class="panel history-card"><span class="eyebrow">${item.kind==='search'?'ПОИСК':'СРАВНЕНИЕ'} · ${new Date(item.created_at).toLocaleString('ru-RU')}</span><h3>${esc(item.title)}</h3><button class="button secondary" data-history="${item.id}">Открыть результат →</button></article>`).join(''):empty('История пока пуста','Здесь появятся результаты ваших поисков и сравнений.');
@@ -485,6 +486,7 @@ $('#history-list').addEventListener('click',event=>{
   }
 });
 function openConnection() {
+  if(window.SupplyMatchWeb){toast('Сервер этой версии: '+apiBase);return;}
   $('#connection-url').value=apiBase; $('#connection-token').value='';
   if(!$('#connection-dialog').open) $('#connection-dialog').showModal();
 }
@@ -508,8 +510,32 @@ document.addEventListener('click',async event=>{ const link=event.target.closest
 window.addEventListener('payments-return',()=>loadState().catch(error=>toast(error.message,true)));
 if('serviceWorker' in navigator && !apiBase && !window.Capacitor?.isNativePlatform?.()) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 $('#refresh-purchases').addEventListener('click',async()=>{ try { await loadState(); toast('Статусы обновлены'); } catch(error) { toast(error.message,true); } });
-$('#export-csv').addEventListener('click',async event=>{ event.preventDefault(); try { const response=await fetch(apiBase+'/api/export',{credentials:'include',headers:{...window.SupplyAccount.headers(),}}); if(!response.ok) throw new Error('Не удалось выгрузить базу. Проверьте подключение.'); const blob=await response.blob(); const url=URL.createObjectURL(blob); const link=document.createElement('a'); link.href=url; link.download='supply-match.csv'; document.body.appendChild(link); link.click(); link.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000); } catch(error) { toast(error.message,true); } });
+$('#export-csv').addEventListener('click',async event=>{ event.preventDefault(); try { const response=await fetch(apiBase+'/api/export',{credentials:window.SupplyMatchWeb?'omit':'include',headers:{...window.SupplyAccount.headers(),}}); if(!response.ok) throw new Error('Не удалось выгрузить базу. Проверьте подключение.'); const blob=await response.blob(); const url=URL.createObjectURL(blob); const link=document.createElement('a'); link.href=url; link.download='supply-match.csv'; document.body.appendChild(link); link.click(); link.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000); } catch(error) { toast(error.message,true); } });
 (async()=>{
   try { if(!await window.SupplyAccount.init())return; await loadState(true); route(); }
   catch(error) { $('#startup-error').textContent=error.message+' Обновите страницу после запуска сервера.'; $('#startup-error').hidden=false; if(location.protocol==='capacitor:' || location.protocol==='file:' || (location.protocol==='https:' && location.hostname==='localhost') || apiBase) openConnection(); }
 })();
+
+function renderSearchMode() {
+  if (!state.search_only) return;
+  $('#ai-indicator span').textContent='Поиск без ИИ';
+  $('#ai-indicator').href='#find';
+  $('#ai-indicator').classList.add('ready');
+  $('#web').checked=true; $('#web').disabled=true;
+  $('#web-hint').textContent='Реальные страницы из поисковых систем, без ИИ и API-ключей. Цены, наличие и доставку проверяйте у продавца. Не все условия из свободного текста учитываются поиском.';
+  $('[data-page="settings"]').hidden=true;
+  const step=$('#step-key').closest('a'); step.href='#find';
+  step.querySelector('strong').textContent='Найдите продавцов';
+  step.querySelector('p').textContent='Поиск готов, ключи не нужны';
+  $('#page-find .side-info > p').textContent='Укажите товар, формат сделки, регион и категорию. Бюджет, количество и пожелания сохраните для проверки условий у продавца.';
+  $('#page-find .side-info').lastElementChild.textContent='Результаты поиска — страницы для проверки. Контакты, наличие и цены уточняйте у поставщика.';
+  $('#rank-submit').textContent='Проверить заполненность условий';
+  $('#requirements').closest('label').hidden=true;
+  $('#rank-form > p.muted').textContent='Заполненность цены, валюты, минимальной партии, срока, условий и контакта. Сводка не подтверждает надёжность продавца.';
+  $('.pricing-notice').textContent='Поиск работает без ИИ и ключей: до 30 запросов в час на аккаунт. Поисковые системы могут временно ограничивать выдачу. Тарифы определяют вместимость базы.';
+  $('#page-pricing .faq').hidden=true;
+
+  $('#page-compare .page-heading p').textContent='Сводка заполненных условий и расчёт стоимости одинаковых моделей. Без оценок ИИ.';
+  $('#page-monitoring .page-heading p').textContent='Проверка новых ссылок раз в сутки, пока сервер работает. Бесплатный Render засыпает при простое; точное время проверки не гарантируется. Новые ссылки требуют проверки цены и наличия.';
+  $$('[data-page="history"]').forEach(link=>link.removeAttribute('aria-disabled'));
+}

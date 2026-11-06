@@ -21,6 +21,7 @@ def configure_render():
     if not 1 <= port <= 65535:
         raise RuntimeError('Некорректный PORT.')
     os.environ['SUPPLY_MATCH_ENV'] = 'production'
+    os.environ.setdefault('SUPPLY_MATCH_NO_AI', '1')
     public = os.environ.get('SUPPLY_MATCH_PUBLIC_URL') or os.environ['RENDER_EXTERNAL_URL']
     parsed = urlsplit(public)
     if parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password:

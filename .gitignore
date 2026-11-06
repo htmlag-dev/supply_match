@@ -29,3 +29,5 @@ backups/
 *.keystore
 *.p12
 *.mobileprovision
+/build/Supply-Match-Hixo.zip
+/build/hixo-preview/

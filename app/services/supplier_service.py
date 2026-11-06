@@ -1,5 +1,6 @@
 """Логика продукта: поиск, приглашение, подбор лучших предложений. Тексты промптов — вверху, правьте под себя."""
 import json
+from app.features import search_only
 from urllib.parse import urlsplit
 
 from app.services.ai_service import AIError, parse_json
@@ -63,7 +64,7 @@ class SupplierService:
 
     def search_with_sources(self, **params):
         sources, mode = [], "model"
-        if params.get('web') and not self.web.key:
+        if search_only() or (params.get('web') and not self.web.key):
             page=params.pop('page',1)
             sources,failures=self.web.discover(product=params.get('product',''),country=params.get('country',''),city=params.get('city',''),category=params.get('category',''),trade_format=params.get('trade_format','B2B'),page=page,depth=params.pop('depth','wide'))
             suppliers=[]
@@ -135,9 +136,28 @@ class SupplierService:
         s = self.db.get_supplier(sid)
         if not s:
             raise KeyError(sid)
+        if search_only():
+            return (f"Здравствуйте! Интересует ваше предложение: {s['offer'] or s['name']}. "
+                    f"Город доставки: {s['city'] or 'уточним при согласовании'}. "
+                    "Пришлите, пожалуйста, актуальный прайс с валютой, минимальную партию, "
+                    "сроки и стоимость доставки. Уточните наличие, комплектацию, гарантию "
+                    "и доступные документы. Возможны ли образец или пробная партия? "
+                    "Для международной поставки укажите условия экспорта и Incoterms. "
+                    "Это запрос условий, а не обязательство приобрести товар.")
         return self.ai.generate(INVITE_PROMPT.format(**s), json_mode=False).strip()
 
     def rank(self, requirements):
+        if search_only():
+            fields = {'unit_price': 'цена', 'currency': 'валюта', 'moq': 'минимальная партия',
+                      'lead_time': 'срок', 'conditions': 'условия', 'contact': 'контакт'}
+            ranking = []
+            for supplier in self.db.list_suppliers():
+                missing = [label for key, label in fields.items() if not str(supplier.get(key) or '').strip()]
+                ranking.append({'name': supplier['name'], 'score': round(100 * (len(fields)-len(missing))/len(fields)),
+                                'reason': 'Нужно уточнить: ' + ', '.join(missing) if missing else 'Основные поля заполнены. Проверьте актуальность у продавца.'})
+            return {'ranking': sorted(ranking, key=lambda row: row['score'], reverse=True),
+                    'mode': 'completeness', 'advice': 'Процент показывает только заполненность шести полей, не качество продавца. Свободные требования автоматически не оцениваются. Для сравнения цены одинаковых моделей используйте расчёт полной стоимости ниже.'}
+
         keys = ("name", "type", "offer", "conditions", "note", "status", "country", "category", "currency", "unit_price", "moq", "lead_time", "incoterms", "trade_format")
         limit = 10 if getattr(self.ai, "provider", "") in ("local", "auto") else 40
         data = [{k: s[k] for k in keys} for s in self.db.list_suppliers()[:limit]]
