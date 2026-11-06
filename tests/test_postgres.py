@@ -40,3 +40,24 @@ class PostgresTests(unittest.TestCase):
             self.assertEqual(sum(results),3)
             db.add_supplier({'name':'Private'})
             other=Database(Path(directory)/(secrets.token_hex(16)+'.enc'));self.assertEqual(other.list_suppliers(),[])
+
+    def test_pool_reuses_connection_and_resets_transaction_between_workspaces(self):
+        from app.postgres import connection, close_pool
+        close_pool()
+        self.addCleanup(close_pool)
+        first = Path(secrets.token_hex(16) + '.enc')
+        second = Path(secrets.token_hex(16) + '.enc')
+        with connection(first) as c:
+            pid = c.execute('SELECT pg_backend_pid() AS pid').fetchone()['pid']
+            c.execute('CREATE TABLE sample(value TEXT)')
+            c.execute('INSERT INTO sample(value) VALUES(?)', ('private',))
+        with self.assertRaises(RuntimeError):
+            with connection(first) as c:
+                c.execute('INSERT INTO sample(value) VALUES(?)', ('rollback',))
+                raise RuntimeError('Simulated failure')
+        with connection(second) as c:
+            self.assertEqual(c.execute('SELECT pg_backend_pid() AS pid').fetchone()['pid'], pid)
+            c.execute('CREATE TABLE sample(value TEXT)')
+            self.assertEqual(c.execute('SELECT * FROM sample').fetchall(), [])
+        with connection(first) as c:
+            self.assertEqual([r['value'] for r in c.execute('SELECT * FROM sample')], ['private'])

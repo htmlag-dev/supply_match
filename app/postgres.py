@@ -4,11 +4,48 @@ The adapter covers this application's SQL dialect only, never arbitrary SQL.
 Connections use transaction-scoped advisory locks so multi-process mutations keep
 SQLite's serial transaction semantics, without re-encrypting whole snapshots.
 """
+import atexit
+import threading
 import hashlib
 import os
 import re
 from contextlib import contextmanager
 from pathlib import Path
+
+
+_POOL = None
+_POOL_DSN = None
+_POOL_LOCK = threading.Lock()
+
+
+def close_pool():
+    global _POOL, _POOL_DSN
+    with _POOL_LOCK:
+        pool, _POOL, _POOL_DSN = _POOL, None, None
+    if pool is not None:
+        pool.close()
+
+
+def _pool(dsn):
+    global _POOL, _POOL_DSN
+    from psycopg.rows import dict_row
+    from psycopg_pool import ConnectionPool
+    with _POOL_LOCK:
+        if _POOL is None or _POOL_DSN != dsn:
+            if _POOL is not None:
+                _POOL.close()
+            _POOL = ConnectionPool(
+                dsn, min_size=1, max_size=4, max_waiting=32, timeout=15,
+                max_idle=60, max_lifetime=600, open=True,
+                kwargs={'row_factory': dict_row, 'connect_timeout': 10,
+                        'prepare_threshold': None},
+                check=ConnectionPool.check_connection,
+            )
+            _POOL_DSN = dsn
+        return _POOL
+
+
+atexit.register(close_pool)
 
 
 def _schema_for(path):
@@ -82,13 +119,11 @@ class Connection:
 
 @contextmanager
 def connection(path):
-    import psycopg
-    from psycopg.rows import dict_row
     from psycopg import sql
     dsn=os.environ.get('SUPPLY_MATCH_DATABASE_URL','')
     if not dsn:raise RuntimeError('Не задан SUPPLY_MATCH_DATABASE_URL.')
     schema=schema_for(path)
-    with psycopg.connect(dsn,row_factory=dict_row,connect_timeout=10) as conn:
+    with _pool(dsn).connection() as conn:
         # Lock the schema before first-use DDL as well as ordinary transactions.
         conn.execute('SELECT pg_advisory_xact_lock(hashtextextended(%s,0))',(schema,))
         conn.execute(sql.SQL('CREATE SCHEMA IF NOT EXISTS {}').format(sql.Identifier(schema)))
