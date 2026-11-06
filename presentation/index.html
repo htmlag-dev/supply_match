@@ -1,0 +1,1943 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#FFFFFF">
+<title>Supply Match — поиск поставщиков для бизнеса (демо)</title>
+<!--
+  Supply Match — автономная демо-версия в одном HTML-файле.
+  Открывается двойным щелчком, сервер и база не нужны: встроены 45 реальных поставщиков по открытым источникам (без цен и отзывов — их добавят сами компании).
+  Крупные компании отмечены «Компания из справочника»; в запросе КП считается примерная стоимость заказа по средним рыночным ценам.
+  Работают поиск, фильтры, сортировка, карточка, сравнение, избранное и форма запроса КП.
+  Избранное, сравнение и отправленные запросы хранятся в localStorage этого браузера.
+  Полная версия с базой данных и сервером — проект Next.js (см. snabpoisk-project-code.txt).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%232456F5'/%3E%3Ccircle cx='14.5' cy='14.5' r='6.5' fill='none' stroke='white' stroke-width='2.6'/%3E%3Cpath d='M19.5 19.5l5 5' stroke='white' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:Manrope,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}html{-webkit-text-size-adjust:100%}body{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1));font-family:Manrope,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-size:1rem;line-height:1.55}body,h1,h2,h3{--tw-text-opacity:1;color:rgb(17 24 39/var(--tw-text-opacity,1))}h1,h2,h3{font-family:Manrope,system-ui,sans-serif;font-weight:800;letter-spacing:-.02em}:focus-visible{outline:3px solid #2456f5;outline-offset:2px}.tabular{font-variant-numeric:tabular-nums}.page{margin-left:auto;margin-right:auto;width:100%;max-width:76rem;padding-left:1rem;padding-right:1rem}@media (min-width:640px){.page{padding-left:1.5rem;padding-right:1.5rem}}.field{display:block;width:100%;border-radius:.75rem;border-width:1px;--tw-border-opacity:1;border-color:rgb(180 188 200/var(--tw-border-opacity,1));--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1));padding:.625rem .75rem;font-size:1rem;line-height:1.5rem;--tw-text-opacity:1;color:rgb(17 24 39/var(--tw-text-opacity,1))}.field::-moz-placeholder{color:rgba(75,85,99,.7)}.field::placeholder{color:rgba(75,85,99,.7)}.field:focus{--tw-border-opacity:1;border-color:rgb(36 86 245/var(--tw-border-opacity,1));outline:2px solid transparent;outline-offset:2px;--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow,0 0 #0000);--tw-ring-color:rgba(36,86,245,.3)}.field{transition-property:border-color,box-shadow;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.label{margin-bottom:.25rem;display:block;font-size:.875rem;line-height:1.25rem;font-weight:500;--tw-text-opacity:1;color:rgb(17 24 39/var(--tw-text-opacity,1))}.btn{display:inline-flex;min-height:2.75rem;align-items:center;justify-content:center;gap:.5rem;border-radius:.75rem;padding:.625rem 1rem;font-size:.875rem;line-height:1.25rem;font-weight:700;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.btn:disabled{cursor:not-allowed;opacity:.6}.btn-primary{display:inline-flex;min-height:2.75rem;align-items:center;justify-content:center;gap:.5rem;border-radius:.75rem;padding:.625rem 1rem;font-size:.875rem;line-height:1.25rem;font-weight:700;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.btn-primary:disabled{cursor:not-allowed;opacity:.6}.btn-primary{--tw-bg-opacity:1;background-color:rgb(36 86 245/var(--tw-bg-opacity,1));--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.btn-primary:hover{--tw-bg-opacity:1;background-color:rgb(26 63 192/var(--tw-bg-opacity,1))}.btn-ghost{display:inline-flex;min-height:2.75rem;align-items:center;justify-content:center;gap:.5rem;border-radius:.75rem;padding:.625rem 1rem;font-size:.875rem;line-height:1.25rem;font-weight:700;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.btn-ghost:disabled{cursor:not-allowed;opacity:.6}.btn-ghost{border-width:1px;--tw-border-opacity:1;border-color:rgb(232 235 240/var(--tw-border-opacity,1));--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1));--tw-text-opacity:1;color:rgb(17 24 39/var(--tw-text-opacity,1))}.btn-ghost:hover{--tw-border-opacity:1;border-color:rgb(180 188 200/var(--tw-border-opacity,1));--tw-bg-opacity:1;background-color:rgb(244 246 250/var(--tw-bg-opacity,1))}.link{--tw-text-opacity:1;color:rgb(36 86 245/var(--tw-text-opacity,1));text-decoration-line:underline;text-decoration-color:rgba(36,86,245,.4);text-underline-offset:2px;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.link:hover{text-decoration-color:#2456f5}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-x-0{left:0;right:0}.inset-y-0{top:0;bottom:0}.-right-2\.5{right:-.625rem}.-top-1\.5{top:-.375rem}.bottom-0{bottom:0}.left-0{left:0}.z-10{z-index:10}.z-20{z-index:20}.z-30{z-index:30}.order-2{order:2}.order-3{order:3}.col-span-2{grid-column:span 2/span 2}.ml-1{margin-left:.25rem}.ml-1\.5{margin-left:.375rem}.ml-2{margin-left:.5rem}.ml-auto{margin-left:auto}.mt-0\.5{margin-top:.125rem}.mt-1{margin-top:.25rem}.mt-1\.5{margin-top:.375rem}.mt-16{margin-top:4rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.mt-6{margin-top:1.5rem}.mt-8{margin-top:2rem}.mt-auto{margin-top:auto}.line-clamp-2{-webkit-line-clamp:2}.line-clamp-2,.line-clamp-3{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical}.line-clamp-3{-webkit-line-clamp:3}.line-clamp-4{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.table{display:table}.grid{display:grid}.contents{display:contents}.hidden{display:none}.h-1{height:.25rem}.h-12{height:3rem}.h-14{height:3.5rem}.h-16{height:4rem}.h-3{height:.75rem}.h-3\.5{height:.875rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-7{height:1.75rem}.h-8{height:2rem}.h-9{height:2.25rem}.h-\[22px\]{height:22px}.h-full{height:100%}.min-h-10{min-height:2.5rem}.min-h-11{min-height:2.75rem}.min-h-12{min-height:3rem}.min-h-8{min-height:2rem}.min-h-9{min-height:2.25rem}.min-h-screen{min-height:100vh}.w-1{width:.25rem}.w-10{width:2.5rem}.w-11{width:2.75rem}.w-12{width:3rem}.w-14{width:3.5rem}.w-16{width:4rem}.w-3{width:.75rem}.w-3\.5{width:.875rem}.w-4{width:1rem}.w-40{width:10rem}.w-5{width:1.25rem}.w-7{width:1.75rem}.w-8{width:2rem}.w-9{width:2.25rem}.w-\[22px\]{width:22px}.w-auto{width:auto}.w-full{width:100%}.min-w-0{min-width:0}.min-w-11{min-width:2.75rem}.min-w-\[12rem\]{min-width:12rem}.min-w-\[18px\]{min-width:18px}.min-w-\[40rem\]{min-width:40rem}.max-w-2xl{max-width:42rem}.max-w-3xl{max-width:48rem}.max-w-\[56ch\]{max-width:56ch}.max-w-\[60ch\]{max-width:60ch}.max-w-\[65ch\]{max-width:65ch}.max-w-\[68ch\]{max-width:68ch}.max-w-\[70ch\]{max-width:70ch}.max-w-sm{max-width:24rem}.max-w-xl{max-width:36rem}.flex-1{flex:1 1 0%}.flex-\[0_1_22rem\]{flex:0 1 22rem}.flex-\[1_1_28rem\]{flex:1 1 28rem}.flex-\[1_1_36rem\]{flex:1 1 36rem}.shrink-0{flex-shrink:0}.basis-full{flex-basis:100%}.border-collapse{border-collapse:collapse}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.list-disc{list-style-type:disc}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-col-reverse{flex-direction:column-reverse}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.items-baseline{align-items:baseline}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-0\.5{gap:.125rem}.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}.gap-2{gap:.5rem}.gap-2\.5{gap:.625rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}.gap-x-2{-moz-column-gap:.5rem;column-gap:.5rem}.gap-x-3{-moz-column-gap:.75rem;column-gap:.75rem}.gap-x-4{-moz-column-gap:1rem;column-gap:1rem}.gap-y-1{row-gap:.25rem}.gap-y-2{row-gap:.5rem}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-1\.5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.375rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.375rem*var(--tw-space-y-reverse))}.space-y-10>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2.5rem*var(--tw-space-y-reverse))}.space-y-3>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.75rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.75rem*var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem*var(--tw-space-y-reverse))}.space-y-5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.space-y-8>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem*var(--tw-space-y-reverse))}.divide-y>:not([hidden])~:not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px*(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px*var(--tw-divide-y-reverse))}.divide-line>:not([hidden])~:not([hidden]){--tw-divide-opacity:1;border-color:rgb(232 235 240/var(--tw-divide-opacity,1))}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.truncate{overflow:hidden;text-overflow:ellipsis}.truncate,.whitespace-nowrap{white-space:nowrap}.break-all{word-break:break-all}.rounded-2xl{border-radius:1rem}.rounded-\[10px\]{border-radius:10px}.rounded-\[14px\]{border-radius:14px}.rounded-\[18px\]{border-radius:18px}.rounded-\[20px\]{border-radius:20px}.rounded-\[24px\]{border-radius:24px}.rounded-\[9px\]{border-radius:9px}.rounded-full{border-radius:9999px}.rounded-sm{border-radius:.125rem}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-0{border-width:0}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-l{border-left-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-danger{--tw-border-opacity:1;border-color:rgb(179 38 30/var(--tw-border-opacity,1))}.border-danger\/40{border-color:rgba(179,38,30,.4)}.border-ink{--tw-border-opacity:1;border-color:rgb(17 24 39/var(--tw-border-opacity,1))}.border-line{--tw-border-opacity:1;border-color:rgb(232 235 240/var(--tw-border-opacity,1))}.border-line-strong{--tw-border-opacity:1;border-color:rgb(180 188 200/var(--tw-border-opacity,1))}.border-ok{--tw-border-opacity:1;border-color:rgb(21 128 61/var(--tw-border-opacity,1))}.border-signal-dark{--tw-border-opacity:1;border-color:rgb(36 86 245/var(--tw-border-opacity,1))}.bg-danger\/5{background-color:rgba(179,38,30,.05)}.bg-ink{--tw-bg-opacity:1;background-color:rgb(17 24 39/var(--tw-bg-opacity,1))}.bg-ok-tint{--tw-bg-opacity:1;background-color:rgb(231 246 236/var(--tw-bg-opacity,1))}.bg-ok\/10{background-color:rgba(21,128,61,.1)}.bg-paper{--tw-bg-opacity:1;background-color:rgb(244 246 250/var(--tw-bg-opacity,1))}.bg-paper\/60{background-color:rgba(244,246,250,.6)}.bg-petrol{--tw-bg-opacity:1;background-color:rgb(36 86 245/var(--tw-bg-opacity,1))}.bg-petrol-tint{--tw-bg-opacity:1;background-color:rgb(238 242 255/var(--tw-bg-opacity,1))}.bg-signal{--tw-bg-opacity:1;background-color:rgb(220 228 255/var(--tw-bg-opacity,1))}.bg-signal-tint{--tw-bg-opacity:1;background-color:rgb(238 242 255/var(--tw-bg-opacity,1))}.bg-signal-tint\/40{background-color:rgba(238,242,255,.4)}.bg-signal-tint\/60{background-color:rgba(238,242,255,.6)}.bg-surface{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.bg-transparent{background-color:transparent}.p-3{padding:.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-0{padding-left:0;padding-right:0}.px-1{padding-left:.25rem;padding-right:.25rem}.px-1\.5{padding-left:.375rem;padding-right:.375rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-2\.5{padding-left:.625rem;padding-right:.625rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-3\.5{padding-left:.875rem;padding-right:.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.px-8{padding-left:2rem;padding-right:2rem}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-12{padding-top:3rem;padding-bottom:3rem}.py-16{padding-top:4rem;padding-bottom:4rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-2\.5{padding-top:.625rem;padding-bottom:.625rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-5{padding-top:1.25rem;padding-bottom:1.25rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pb-24{padding-bottom:6rem}.pl-4{padding-left:1rem}.pl-5{padding-left:1.25rem}.pr-1{padding-right:.25rem}.pr-3{padding-right:.75rem}.pt-1{padding-top:.25rem}.pt-14{padding-top:3.5rem}.pt-3{padding-top:.75rem}.pt-6{padding-top:1.5rem}.text-left{text-align:left}.text-center{text-align:center}.text-right{text-align:right}.align-top{vertical-align:top}.align-bottom{vertical-align:bottom}.font-display{font-family:Manrope,system-ui,sans-serif}.font-sans{font-family:Manrope,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[11px\]{font-size:11px}.text-\[15px\]{font-size:15px}.text-\[17px\]{font-size:17px}.text-\[2rem\]{font-size:2rem}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.leading-\[1\.08\]{line-height:1.08}.leading-\[18px\]{line-height:18px}.leading-none{line-height:1}.leading-snug{line-height:1.375}.leading-tight{line-height:1.25}.tracking-tight{letter-spacing:-.025em}.text-danger{--tw-text-opacity:1;color:rgb(179 38 30/var(--tw-text-opacity,1))}.text-ink{--tw-text-opacity:1;color:rgb(17 24 39/var(--tw-text-opacity,1))}.text-ink-soft{--tw-text-opacity:1;color:rgb(55 65 81/var(--tw-text-opacity,1))}.text-muted{--tw-text-opacity:1;color:rgb(75 85 99/var(--tw-text-opacity,1))}.text-ok{--tw-text-opacity:1;color:rgb(21 128 61/var(--tw-text-opacity,1))}.text-ok-dark{--tw-text-opacity:1;color:rgb(22 101 52/var(--tw-text-opacity,1))}.text-petrol,.text-signal-dark{--tw-text-opacity:1;color:rgb(36 86 245/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.text-white\/70{color:hsla(0,0%,100%,.7)}.text-white\/75{color:hsla(0,0%,100%,.75)}.text-white\/80{color:hsla(0,0%,100%,.8)}.underline{text-decoration-line:underline}.accent-petrol{accent-color:#2456f5}.shadow-lift{--tw-shadow:0 1px 2px rgba(17,24,39,.04),0 12px 32px -16px rgba(17,24,39,.18);--tw-shadow-colored:0 1px 2px var(--tw-shadow-color),0 12px 32px -16px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-shadow{transition-property:box-shadow;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-200{transition-duration:.2s}@keyframes page-enter{0%{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}.page-enter{animation:page-enter .28s cubic-bezier(.2,.7,.2,1) both}@keyframes fade-in{0%{opacity:0}to{opacity:1}}details[open]>:not(summary){animation:fade-in .2s ease-out}@media (prefers-reduced-motion:reduce){*,:after,:before{animation-duration:.01ms!important;transition-duration:.01ms!important}}.placeholder\:text-muted::-moz-placeholder{--tw-text-opacity:1;color:rgb(75 85 99/var(--tw-text-opacity,1))}.placeholder\:text-muted::placeholder{--tw-text-opacity:1;color:rgb(75 85 99/var(--tw-text-opacity,1))}.first\:border-t-0:first-child{border-top-width:0}.last\:border-b-0:last-child{border-bottom-width:0}.hover\:border-ink:hover{--tw-border-opacity:1;border-color:rgb(17 24 39/var(--tw-border-opacity,1))}.hover\:bg-paper:hover{--tw-bg-opacity:1;background-color:rgb(244 246 250/var(--tw-bg-opacity,1))}.hover\:bg-petrol-tint:hover{--tw-bg-opacity:1;background-color:rgb(238 242 255/var(--tw-bg-opacity,1))}.hover\:text-petrol:hover{--tw-text-opacity:1;color:rgb(36 86 245/var(--tw-text-opacity,1))}.hover\:text-petrol-dark:hover{--tw-text-opacity:1;color:rgb(26 63 192/var(--tw-text-opacity,1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.hover\:underline:hover{text-decoration-line:underline}.hover\:shadow-lift:hover{--tw-shadow:0 1px 2px rgba(17,24,39,.04),0 12px 32px -16px rgba(17,24,39,.18);--tw-shadow-colored:0 1px 2px var(--tw-shadow-color),0 12px 32px -16px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.focus\:not-sr-only:focus{position:static;width:auto;height:auto;padding:0;margin:0;overflow:visible;clip:auto;white-space:normal}.focus\:absolute:focus{position:absolute}.focus\:left-2:focus{left:.5rem}.focus\:top-2:focus{top:.5rem}.focus\:z-50:focus{z-index:50}.focus\:rounded:focus{border-radius:.25rem}.focus\:bg-signal:focus{--tw-bg-opacity:1;background-color:rgb(220 228 255/var(--tw-bg-opacity,1))}.focus\:px-3:focus{padding-left:.75rem;padding-right:.75rem}.focus\:py-2:focus{padding-top:.5rem;padding-bottom:.5rem}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.group:hover .group-hover\:text-petrol{--tw-text-opacity:1;color:rgb(36 86 245/var(--tw-text-opacity,1))}.has-\[\:checked\]\:border-petrol:has(:checked){--tw-border-opacity:1;border-color:rgb(36 86 245/var(--tw-border-opacity,1))}.has-\[\:checked\]\:bg-petrol-tint:has(:checked){--tw-bg-opacity:1;background-color:rgb(238 242 255/var(--tw-bg-opacity,1))}@media (min-width:640px){.sm\:not-sr-only{position:static;width:auto;height:auto;padding:0;margin:0;overflow:visible;clip:auto;white-space:normal}.sm\:block{display:block}.sm\:inline{display:inline}.sm\:table-cell{display:table-cell}.sm\:table-header-group{display:table-header-group}.sm\:table-row{display:table-row}.sm\:hidden{display:none}.sm\:w-auto{width:auto}.sm\:min-w-\[4\.5rem\]{min-width:4.5rem}.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.sm\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.sm\:grid-cols-\[2fr_1fr_1fr\]{grid-template-columns:2fr 1fr 1fr}.sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}.sm\:items-baseline{align-items:baseline}.sm\:justify-between{justify-content:space-between}.sm\:p-0{padding:0}.sm\:p-8{padding:2rem}.sm\:px-10{padding-left:2.5rem;padding-right:2.5rem}.sm\:px-4{padding-left:1rem;padding-right:1rem}.sm\:px-5{padding-left:1.25rem;padding-right:1.25rem}.sm\:py-12{padding-top:3rem;padding-bottom:3rem}.sm\:py-3{padding-top:.75rem;padding-bottom:.75rem}.sm\:py-8{padding-top:2rem;padding-bottom:2rem}.sm\:pl-16{padding-left:4rem}.sm\:text-right{text-align:right}.sm\:text-2xl{font-size:1.5rem;line-height:2rem}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}.sm\:text-4xl{font-size:2.25rem;line-height:2.5rem}.sm\:text-5xl{font-size:3rem;line-height:1}.sm\:text-\[1\.75rem\]{font-size:1.75rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-ink{--tw-text-opacity:1;color:rgb(17 24 39/var(--tw-text-opacity,1))}}@media (min-width:768px){.md\:sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}.md\:order-2{order:2}.md\:order-3{order:3}.md\:col-start-1{grid-column-start:1}.md\:-mt-2{margin-top:-.5rem}.md\:block{display:block}.md\:grid{display:grid}.md\:contents{display:contents}.md\:w-auto{width:auto}.md\:flex-1{flex:1 1 0%}.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.md\:grid-cols-\[minmax\(0\2c 1fr\)_9\.5rem_8\.5rem_8\.5rem\]{grid-template-columns:minmax(0,1fr) 9.5rem 8.5rem 8.5rem}.md\:gap-6{gap:1.5rem}.md\:border-0{border-width:0}.md\:pt-0{padding-top:0}}@media (min-width:1024px){.lg\:sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}.lg\:sticky{position:sticky}.lg\:top-4{top:1rem}.lg\:col-span-4{grid-column:span 4/span 4}.lg\:mt-0{margin-top:0}.lg\:block{display:block}.lg\:flex{display:flex}.lg\:inline-flex{display:inline-flex}.lg\:grid{display:grid}.lg\:hidden{display:none}.lg\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.lg\:grid-cols-\[17rem_minmax\(0\2c 1fr\)\]{grid-template-columns:17rem minmax(0,1fr)}.lg\:grid-cols-\[minmax\(0\2c 1\.4fr\)_9rem_9rem_7rem_minmax\(0\2c 1fr\)\]{grid-template-columns:minmax(0,1.4fr) 9rem 9rem 7rem minmax(0,1fr)}.lg\:grid-cols-\[minmax\(0\2c 1fr\)_20rem\]{grid-template-columns:minmax(0,1fr) 20rem}.lg\:items-end{align-items:flex-end}.lg\:gap-5{gap:1.25rem}.lg\:self-start{align-self:flex-start}.lg\:self-center{align-self:center}.lg\:pb-0{padding-bottom:0}}
+/* Вкладки меню: текущая подчёркнута, полоска плавно выезжает */
+.nav-tab { transition: color .2s, background-color .2s; }
+.nav-tab[aria-current="page"] { color: #2456F5; }
+.tab-bar { position: absolute; left: .75rem; right: .75rem; bottom: -2px; height: 2px; border-radius: 2px; background: #2456F5; transform: scaleX(0); transform-origin: left; transition: transform .3s ease-out; }
+.nav-tab[aria-current="page"] .tab-bar { transform: scaleX(1); }
+@media (prefers-reduced-motion: reduce) { .nav-tab, .tab-bar { transition: none; } }
+</style>
+<style>
+body{background:#f5f6f8;color:#192332}header{background:rgba(255,255,255,.96)!important;border-bottom:1px solid #e2e7ef!important}h1{letter-spacing:-.055em!important;line-height:1.09!important}h2{letter-spacing:-.035em!important}.btn-primary{background:#2855e9;box-shadow:0 5px 14px #2855e925}.btn-primary:hover{transform:translateY(-1px);background:#2046ca}.rounded-2xl{border-radius:22px}.bg-surface{box-shadow:0 6px 26px #15284905}.field{background:#fff;border-color:#ccd4df}.presentation-note{padding:10px 22px;background:#162439;color:#e4ecfb;font:12px/1.6 system-ui;text-align:center}.presentation-note strong{color:#a5c3ff}button,a,input,select,textarea{touch-action:manipulation}@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}@media(max-width:640px){h1{font-size:34px!important}.presentation-note{padding:8px 14px;text-align:left}}
+</style></head>
+<body class="flex min-h-screen flex-col">
+<a href="#" data-skip class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-signal focus:px-3 focus:py-2">Перейти к содержимому</a>
+
+<div class="bg-signal-tint text-center text-xs text-ink">
+  <p class="page py-1.5">Демо-версия без сервера: данные встроены в файл, запросы КП сохраняются только в этом браузере.</p>
+</div>
+
+<header class="border-b border-line bg-surface">
+  <div class="page flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
+    <a href="#/" class="flex items-center gap-2.5" aria-label="Supply Match — на главную">
+      <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-petrol" aria-hidden="true"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg></span>
+      <span class="font-display text-xl font-extrabold tracking-tight text-ink">Supply Match</span>
+    </a>
+    <form data-hixo="off" data-route="/search" role="search" id="header-search" class="order-3 flex w-full min-w-0 items-center gap-2 rounded-xl bg-paper py-1 pl-4 pr-1 md:order-2 md:w-auto md:flex-1">
+      <label for="header-q" class="sr-only">Товар, услуга или компания</label>
+      <input id="header-q" name="q" type="search" placeholder="Товар, услуга или компания" class="min-h-10 min-w-0 flex-1 border-0 bg-transparent text-[15px] placeholder:text-muted focus:outline-none">
+      <button type="submit" class="btn-primary min-h-10 rounded-[9px] px-4">Найти</button>
+    </form>
+    <nav aria-label="Основная навигация" class="order-2 ml-auto flex items-center md:order-3">
+      <a href="#/favorites" data-tab="/favorites" class="nav-tab relative flex min-h-11 min-w-11 sm:min-w-[4.5rem] flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-1 text-xs font-semibold text-ink-soft hover:bg-paper"><span class="relative"><svg viewBox="0 0 24 24" class="h-[22px] w-[22px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span id="fav-count" class="tabular absolute -right-2.5 -top-1.5 hidden min-w-[18px] rounded-full bg-petrol px-1 text-center text-[11px] font-bold leading-[18px] text-white"></span></span><span class="sr-only sm:not-sr-only">Избранное</span><span aria-hidden="true" class="tab-bar"></span></a>
+      <a href="#/compare" id="compare-link" data-tab="/compare" class="nav-tab relative flex min-h-11 min-w-11 sm:min-w-[4.5rem] flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-1 text-xs font-semibold text-ink-soft hover:bg-paper"><span class="relative"><svg viewBox="0 0 24 24" class="h-[22px] w-[22px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg><span id="cmp-count" class="tabular absolute -right-2.5 -top-1.5 hidden min-w-[18px] rounded-full bg-petrol px-1 text-center text-[11px] font-bold leading-[18px] text-white"></span></span><span class="sr-only sm:not-sr-only">Сравнение</span><span aria-hidden="true" class="tab-bar"></span></a>
+      <a href="#/requests" data-tab="/requests" class="nav-tab relative flex min-h-11 min-w-11 sm:min-w-[4.5rem] flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-1 text-xs font-semibold text-ink-soft hover:bg-paper"><span class="relative"><svg viewBox="0 0 24 24" class="h-[22px] w-[22px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v12H8l-4 4z"/></svg><span id="req-count" class="tabular absolute -right-2.5 -top-1.5 hidden min-w-[18px] rounded-full bg-petrol px-1 text-center text-[11px] font-bold leading-[18px] text-white"></span></span><span class="sr-only sm:not-sr-only">Запросы</span><span aria-hidden="true" class="tab-bar"></span></a>
+      <a href="#/for-suppliers" class="ml-1 hidden min-h-11 items-center rounded-xl px-3 text-sm font-bold text-petrol hover:bg-paper lg:flex">Поставщикам</a>
+    </nav>
+  </div>
+</header>
+
+<main id="app" class="flex-1" tabindex="-1"></main>
+
+<footer class="mt-16 border-t border-line bg-surface text-sm text-muted">
+  <div class="page grid gap-8 py-10 sm:grid-cols-[2fr_1fr_1fr]">
+    <div class="max-w-sm">
+      <span class="font-display text-xl font-extrabold tracking-tight text-ink">Supply Match</span>
+      <p class="mt-3">Поиск поставщиков для бизнеса: сравнение условий и запрос коммерческого предложения.</p>
+    </div>
+    <div>
+      <h2 class="font-sans text-sm font-bold text-ink">Закупщикам</h2>
+      <ul class="mt-2 space-y-1.5">
+        <li><a href="#/search" class="hover:text-petrol">Поиск поставщиков</a></li>
+        <li><a href="#/rfq" class="hover:text-petrol">Запрос КП на площадку</a></li>
+        <li><a href="#/compare" class="hover:text-petrol">Сравнение</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="font-sans text-sm font-bold text-ink">Компания</h2>
+      <ul class="mt-2 space-y-1.5">
+        <li><a href="#/for-suppliers" class="hover:text-petrol">Разместить компанию</a></li>
+        <li><a href="#/privacy" class="hover:text-petrol">Обработка персональных данных</a></li>
+        <li><a href="mailto:hello@example.com" class="hover:text-petrol">hello@example.com</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-line">
+    <p class="page py-4 text-xs">© 2026 Supply Match. Компании в каталоге — реальные, карточки составлены по открытым источникам. Цены, условия и отзывы появятся, когда компании подтвердят размещение.</p>
+  </div>
+</footer>
+
+<div id="compare-bar"></div>
+
+<script>
+// Расчёт срока доставки — тот же код, что src/lib/delivery.ts полной версии (собран esbuild)
+"use strict";
+var Delivery = (() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+  // src/lib/delivery.ts
+  var delivery_exports = {};
+  __export(delivery_exports, {
+    CARRIER_MODE: () => CARRIER_MODE,
+    CITIES: () => CITIES,
+    CITY_NAMES: () => CITY_NAMES,
+    LTL_PRICES: () => LTL_PRICES,
+    MODE_LABEL: () => MODE_LABEL,
+    RATES_AS_OF: () => RATES_AS_OF,
+    RATE_SOURCES: () => RATE_SOURCES,
+    REGION_CAPITAL: () => REGION_CAPITAL,
+    carrierMode: () => carrierMode,
+    costRange: () => costRange,
+    dayRange: () => dayRange,
+    estimateCost: () => estimateCost,
+    estimateDelivery: () => estimateDelivery,
+    findCity: () => findCity,
+    straightKm: () => straightKm,
+    weightFromQuantity: () => weightFromQuantity
+  });
+  var MODE_LABEL = {
+    ltl: "сборный груз",
+    ftl: "отдельная машина"
+  };
+  var CARRIER_MODE = {
+    pek: "ltl",
+    "delovye-linii": "ltl",
+    "baikal-servis": "ltl",
+    "tk-kit": "ltl",
+    cdek: "ltl",
+    monopoliya: "ftl"
+  };
+  var carrierMode = (slug) => {
+    var _a;
+    return (_a = CARRIER_MODE[slug]) != null ? _a : "ltl";
+  };
+  var CITIES = {
+    Москва: [55.756, 37.617],
+    "Санкт-Петербург": [59.939, 30.316],
+    Екатеринбург: [56.838, 60.605],
+    Новосибирск: [55.03, 82.92],
+    Казань: [55.796, 49.106],
+    "Нижний Новгород": [56.327, 44.006],
+    Челябинск: [55.16, 61.403],
+    Самара: [53.195, 50.1],
+    Омск: [54.989, 73.368],
+    "Ростов-на-Дону": [47.235, 39.701],
+    Уфа: [54.735, 55.958],
+    Красноярск: [56.01, 92.852],
+    Пермь: [58.01, 56.229],
+    Воронеж: [51.661, 39.2],
+    Волгоград: [48.708, 44.513],
+    Краснодар: [45.035, 38.975],
+    Саратов: [51.533, 46.034],
+    Тюмень: [57.153, 65.534],
+    Тольятти: [53.508, 49.419],
+    Ижевск: [56.852, 53.205],
+    Барнаул: [53.348, 83.779],
+    Ульяновск: [54.314, 48.403],
+    Иркутск: [52.287, 104.305],
+    Хабаровск: [48.48, 135.072],
+    Владивосток: [43.116, 131.882],
+    Ярославль: [57.626, 39.884],
+    Махачкала: [42.983, 47.504],
+    Томск: [56.484, 84.948],
+    Оренбург: [51.768, 55.097],
+    Кемерово: [55.355, 86.087],
+    Новокузнецк: [53.757, 87.136],
+    Рязань: [54.629, 39.736],
+    "Набережные Челны": [55.743, 52.396],
+    Астрахань: [46.348, 48.033],
+    Пенза: [53.195, 45.018],
+    Киров: [58.603, 49.668],
+    Липецк: [52.609, 39.599],
+    Чебоксары: [56.146, 47.251],
+    Калининград: [54.71, 20.452],
+    Тула: [54.193, 37.618],
+    Курск: [51.73, 36.193],
+    Ставрополь: [45.044, 41.969],
+    Сочи: [43.585, 39.723],
+    Тверь: [56.859, 35.912],
+    Белгород: [50.596, 36.587],
+    Брянск: [53.243, 34.364],
+    Иваново: [57, 40.973],
+    Владимир: [56.129, 40.407],
+    Архангельск: [64.539, 40.516],
+    Смоленск: [54.782, 32.045],
+    Калуга: [54.514, 36.262],
+    Курган: [55.441, 65.341],
+    Вологда: [59.22, 39.891],
+    Мурманск: [68.97, 33.075],
+    Псков: [57.819, 28.332],
+    "Великий Новгород": [58.522, 31.27],
+    Петрозаводск: [61.785, 34.346],
+    Майкоп: [44.609, 40.106],
+    Сургут: [61.254, 73.396],
+    Якутск: [62.028, 129.732],
+    Чита: [52.034, 113.499],
+    "Улан-Удэ": [51.834, 107.584],
+    // Города поставщиков каталога
+    Алексеевка: [50.63, 38.69],
+    Волоколамск: [56.035, 35.958],
+    Воскресенск: [55.317, 38.652],
+    Дзержинск: [56.238, 43.461],
+    Кольчугино: [56.3, 39.379],
+    Красногорск: [55.831, 37.33],
+    Лобня: [56.012, 37.474],
+    "Павловский Посад": [55.782, 38.651],
+    Подольск: [55.431, 37.545],
+    Раменское: [55.567, 38.23],
+    "Старая Купавна": [55.807, 38.177],
+    Химки: [55.889, 37.445],
+    Щёлково: [55.92, 37.99]
+  };
+  var CITY_ALIASES = {
+    спб: "Санкт-Петербург",
+    питер: "Санкт-Петербург",
+    мск: "Москва",
+    "воскресенский район": "Воскресенск",
+    екб: "Екатеринбург",
+    нск: "Новосибирск",
+    "н. новгород": "Нижний Новгород",
+    "новгород великий": "Великий Новгород",
+    ростов: "Ростов-на-Дону"
+  };
+  var REGION_CAPITAL = {
+    "Московская область": "Москва",
+    "Ленинградская область": "Санкт-Петербург",
+    "Свердловская область": "Екатеринбург",
+    "Новосибирская область": "Новосибирск",
+    "Республика Татарстан": "Казань",
+    "Нижегородская область": "Нижний Новгород",
+    "Челябинская область": "Челябинск",
+    "Самарская область": "Самара",
+    "Омская область": "Омск",
+    "Ростовская область": "Ростов-на-Дону",
+    "Республика Башкортостан": "Уфа",
+    "Красноярский край": "Красноярск",
+    "Пермский край": "Пермь",
+    "Воронежская область": "Воронеж",
+    "Волгоградская область": "Волгоград",
+    "Краснодарский край": "Краснодар",
+    "Саратовская область": "Саратов",
+    "Тюменская область": "Тюмень",
+    "Удмуртская Республика": "Ижевск",
+    "Алтайский край": "Барнаул",
+    "Ульяновская область": "Ульяновск",
+    "Иркутская область": "Иркутск",
+    "Хабаровский край": "Хабаровск",
+    "Приморский край": "Владивосток",
+    "Ярославская область": "Ярославль",
+    "Республика Дагестан": "Махачкала",
+    "Томская область": "Томск",
+    "Оренбургская область": "Оренбург",
+    "Кемеровская область": "Кемерово",
+    "Рязанская область": "Рязань",
+    "Астраханская область": "Астрахань",
+    "Пензенская область": "Пенза",
+    "Кировская область": "Киров",
+    "Липецкая область": "Липецк",
+    "Чувашская Республика": "Чебоксары",
+    "Калининградская область": "Калининград",
+    "Тульская область": "Тула",
+    "Курская область": "Курск",
+    "Ставропольский край": "Ставрополь",
+    "Тверская область": "Тверь",
+    "Белгородская область": "Белгород",
+    "Брянская область": "Брянск",
+    "Ивановская область": "Иваново",
+    "Владимирская область": "Владимир",
+    "Архангельская область": "Архангельск",
+    "Смоленская область": "Смоленск",
+    "Калужская область": "Калуга",
+    "Курганская область": "Курган",
+    "Вологодская область": "Вологда",
+    "Мурманская область": "Мурманск",
+    "Псковская область": "Псков",
+    "Новгородская область": "Великий Новгород",
+    "Республика Карелия": "Петрозаводск",
+    "Республика Адыгея": "Майкоп"
+  };
+  var norm = (s) => s.toLowerCase().replace(/ё/g, "е").replace(/^\s*(г\.|город)\s*/, "").replace(/\s+/g, " ").replace(/(^| )обл\.?(?=$|[ ,])/g, "$1область").replace(/^респ\.?\s/, "республика ").trim();
+  var CITY_INDEX = new Map(Object.keys(CITIES).map((c) => [norm(c), c]));
+  var REGION_INDEX = new Map(Object.keys(REGION_CAPITAL).map((r) => [norm(r), r]));
+  var BY_LENGTH = [...CITY_INDEX.entries()].sort((a, b) => b[0].length - a[0].length);
+  function findCity(input) {
+    var _a, _b;
+    if (!input) return null;
+    const n = norm(input);
+    if (!n) return null;
+    const direct = (_a = CITY_INDEX.get(n)) != null ? _a : CITY_ALIASES[n];
+    if (direct) return { city: direct, viaRegion: null };
+    const region = REGION_INDEX.get(n);
+    if (region) return { city: REGION_CAPITAL[region], viaRegion: region };
+    for (const [key, city] of BY_LENGTH) {
+      const i = n.indexOf(key);
+      const before = i > 0 ? n[i - 1] : " ";
+      const after = (_b = n[i + key.length]) != null ? _b : " ";
+      if (i >= 0 && !/[a-zа-я0-9-]/.test(before) && !/[a-zа-я0-9-]/.test(after)) return { city, viaRegion: null };
+    }
+    for (const [key, region2] of REGION_INDEX) if (n.includes(key)) return { city: REGION_CAPITAL[region2], viaRegion: region2 };
+    return null;
+  }
+  function straightKm(a, b) {
+    const p = CITIES[a];
+    const q = CITIES[b];
+    if (!p || !q) return null;
+    const rad = (d) => d * Math.PI / 180;
+    const dLat = rad(q[0] - p[0]);
+    const dLon = rad(q[1] - p[1]);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(p[0])) * Math.cos(rad(q[0])) * Math.sin(dLon / 2) ** 2;
+    return 2 * 6371 * Math.asin(Math.sqrt(h));
+  }
+  function estimateDelivery(fromCity, toCity, mode) {
+    var _a, _b;
+    const from = (_a = findCity(fromCity)) == null ? void 0 : _a.city;
+    const to = (_b = findCity(toCity)) == null ? void 0 : _b.city;
+    if (!from || !to) return null;
+    const km = straightKm(from, to);
+    if (km === null) return null;
+    const roadKm = Math.max(10, Math.round(km * 1.25 / 10) * 10);
+    let minDays;
+    let maxDays;
+    if (roadKm <= 100) {
+      [minDays, maxDays] = mode === "ftl" ? [1, 1] : [1, 2];
+    } else if (mode === "ftl") {
+      minDays = Math.max(1, Math.ceil(roadKm / 600));
+      maxDays = minDays + 1;
+    } else {
+      minDays = Math.ceil(roadKm / 500) + 1;
+      maxDays = minDays + 2;
+    }
+    return { from, to, roadKm, minDays, maxDays, mode };
+  }
+  var RATES_AS_OF = "октябрь 2026";
+  var RATE_SOURCES = [
+    { name: "DeliveryGoods, индекс ставок (10 т), 22.10.2026", url: "https://deliverygoods.ru/price-index" },
+    { name: "Cargo.run через ТКС.ру (фура 20 т), III кв. 2026", url: "https://www.tks.ru/logistics/2026/10/19/0004/avtoperevozki-v-rossii-dorozhayut-iz-za-toplivnyih-pereboev-i-nehvatki-transporta/" },
+    { name: "Main Transport: отдельные машины, апрель 2026", url: "https://maintransport.ru/pro/ftl" },
+    { name: "Main Transport: сборные грузы, июнь 2026", url: "https://maintransport.ru/pro/economical" }
+  ];
+  var LTL_POINTS = [1, 10, 50, 100, 500, 1e3];
+  var LTL_PRICES = {
+    pek: [736, 1064, 1663, 3313, 15849, 31239],
+    "delovye-linii": [759, 1050, 1668, 3285, 15804, 31114],
+    "tk-kit": [671, 961, 1517, 3017, 14479, 28474],
+    "baikal-servis": [726, 1033, 1299, 3328, 15899, 31235]
+  };
+  var LTL_AVERAGE = LTL_POINTS.map((_, i) => {
+    const all = Object.values(LTL_PRICES);
+    return all.reduce((sum, p) => sum + p[i], 0) / all.length;
+  });
+  function ltlPrice(slug, weightKg) {
+    const prices = slug && LTL_PRICES[slug] || LTL_AVERAGE;
+    if (weightKg <= LTL_POINTS[0]) return prices[0];
+    if (weightKg >= 1e3) return prices[5] / 1e3 * weightKg;
+    for (let i = 1; i < LTL_POINTS.length; i++) {
+      if (weightKg <= LTL_POINTS[i]) {
+        const t = (weightKg - LTL_POINTS[i - 1]) / (LTL_POINTS[i] - LTL_POINTS[i - 1]);
+        return prices[i - 1] + t * (prices[i] - prices[i - 1]);
+      }
+    }
+    return prices[5];
+  }
+  function truckRate10(roadKm) {
+    return roadKm <= 500 ? 138.8 : roadKm <= 1e3 ? 102.4 : roadKm <= 2e3 ? 89.1 : 70.2;
+  }
+  function estimateCost(opts) {
+    const { roadKm, mode, weightKg, carrierSlug } = opts;
+    if (roadKm <= 100) return { ok: false, reason: "по городу считают по часам — уточните у перевозчика" };
+    if (!weightKg || weightKg <= 0) return { ok: false, reason: "укажите вес груза" };
+    if (mode === "ltl") {
+      const mid2 = ltlPrice(carrierSlug, weightKg);
+      const known = carrierSlug ? Boolean(LTL_PRICES[carrierSlug]) : false;
+      return {
+        ok: true,
+        low: mid2 * 0.7,
+        high: mid2 * 1.3,
+        basis: `сборный груз ${fmtKg(weightKg)}, средняя цена ${known ? "перевозчика" : "по рынку"} по России`,
+        hint: weightKg > 3e3 ? "При таком весе обычно выгоднее отдельная машина." : void 0
+      };
+    }
+    let rate;
+    let trucks = 1;
+    let vehicle;
+    if (weightKg <= 1500) {
+      rate = 49;
+      vehicle = "«Газель» 1,5 т";
+    } else if (weightKg <= 1e4) {
+      rate = truckRate10(roadKm);
+      vehicle = "грузовик 10 т";
+    } else {
+      rate = Math.max(114, truckRate10(roadKm));
+      trucks = Math.ceil(weightKg / 2e4);
+      vehicle = trucks > 1 ? `${trucks} фуры по 20 т` : "фура 20 т";
+    }
+    const mid = rate * roadKm * trucks;
+    return {
+      ok: true,
+      low: mid * 0.8,
+      high: mid * 1.2,
+      basis: `${vehicle}, ≈ ${rate.toLocaleString("ru-RU")} ₽/км × ${roadKm.toLocaleString("ru-RU")} км`
+    };
+  }
+  var fmtKg = (kg) => kg >= 1e3 ? `${(kg / 1e3).toLocaleString("ru-RU", { maximumFractionDigits: 1 })} т` : `${Math.round(kg)} кг`;
+  function costRange(low, high) {
+    const step = high >= 1e4 ? 1e3 : 100;
+    const lo = Math.floor(low / step) * step;
+    const hi = Math.ceil(high / step) * step;
+    const f = (n) => n.toLocaleString("ru-RU");
+    return `≈ ${f(lo)}–${f(hi)} ₽`;
+  }
+  function weightFromQuantity(text) {
+    if (!text) return null;
+    const m = text.replace(/\u00a0/g, " ").match(/(\d[\d\s]*(?:[.,]\d+)?)\s*(тонн[а-я]*|тн|т|кг|килограмм[а-я]*)(?=$|[\s.,;)])/i);
+    if (!m) return null;
+    const n = Number(m[1].replace(/\s/g, "").replace(",", "."));
+    if (!Number.isFinite(n) || n <= 0) return null;
+    return /^к/i.test(m[2]) ? n : n * 1e3;
+  }
+  function dayRange(min, max) {
+    const word = (n) => {
+      const a = n % 10, b = n % 100;
+      return a === 1 && b !== 11 ? "день" : a >= 2 && a <= 4 && (b < 10 || b >= 20) ? "дня" : "дней";
+    };
+    return min === max ? `${min} ${word(min)}` : `${min}–${max} ${word(max)}`;
+  }
+  var CITY_NAMES = Object.keys(CITIES).sort((a, b) => a.localeCompare(b, "ru"));
+  return __toCommonJS(delivery_exports);
+})();
+
+</script>
+<script>
+// Средние рыночные цены для оценки стоимости заказа — тот же код, что src/lib/prices.ts
+"use strict";
+var Prices = (() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+  // src/lib/prices.ts
+  var prices_exports = {};
+  __export(prices_exports, {
+    PRICES_AS_OF: () => PRICES_AS_OF,
+    PRICE_ITEMS: () => PRICE_ITEMS,
+    PRICE_ITEM_NAMES: () => PRICE_ITEM_NAMES,
+    UNIT_LABEL: () => UNIT_LABEL,
+    estimateGoods: () => estimateGoods,
+    findPriceItem: () => findPriceItem,
+    moneyApprox: () => moneyApprox,
+    moneyRange: () => moneyRange,
+    parseQuantity: () => parseQuantity,
+    qtyLabel: () => qtyLabel,
+    unitPrice: () => unitPrice
+  });
+  var PRICES_AS_OF = "октябрь 2026";
+  var PRICE_ITEMS = [
+    // ── Металлопрокат ──
+    {
+      id: "armatura",
+      name: "Арматура А500С",
+      match: /арматур/,
+      unit: "т",
+      low: 66e3,
+      high: 8e4,
+      typical: 70500,
+      note: "диаметр 8–16 мм, базовые цены металлобаз в Москве",
+      sources: [
+        { name: "23MET — цены на арматуру А500С 12 мм в Москве", url: "https://23met.ru/price/armatura_a3/12?filter=a500s" },
+        { name: "Металлоторг — арматура А500С 12 мм", url: "https://www.metallotorg.ru/info/metallobaza/chelyabinsk/armatura-riflenaya-a3/armatura-a500s/rzm-12mm-/dl-11-7m/" }
+      ]
+    },
+    {
+      id: "truba-profilnaya",
+      name: "Труба профильная 40×20×2 мм",
+      match: /(профил\S* труб|труб\S* проф)/,
+      unit: "м",
+      low: 84,
+      high: 115,
+      convert: { т: 568, кг: 0.568 },
+      // 1 м весит ≈ 1,76 кг
+      note: "другой размер — другая цена за метр",
+      sources: [
+        { name: "РТ-Металл — труба 40×20×2", url: "https://rt-metall.ru/%D1%82%D1%80%D1%83%D0%B1%D0%B0-%D0%BF%D1%80%D1%8F%D0%BC%D0%BE%D1%83%D0%B3%D0%BE%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F-40%D1%8520%D1%852/" },
+        { name: "Металл ДК — труба 40×20×2", url: "https://metall-dk.ru/catalog/truba-profilnaya/truba-pryamougolnaya/40x20/40x20x2/" }
+      ]
+    },
+    {
+      id: "list-gk",
+      name: "Лист горячекатаный",
+      match: /(горячекатан|г\/к)/,
+      unit: "т",
+      low: 45e3,
+      high: 65e3,
+      note: "толщина 3 мм, Москва",
+      sources: [
+        { name: "ГлавМеталлСталь — лист г/к 3 мм", url: "https://glavmetalstal.ru/listovoj-prokat/list-stalnoj/list-stalnoj-goryachekatanyij/list-goryachekatanyij-3-mm/" },
+        { name: "ПКФ-М — лист г/к 3 мм", url: "https://pkf-m.ru/list-goryachekatanyij/list-goryachekatanyij-3-mm-st1-3-1500x6000/" }
+      ]
+    },
+    {
+      id: "profnastil",
+      name: "Профнастил С8, 0,5 мм",
+      match: /(профнастил|профлист)/,
+      unit: "м2",
+      low: 375,
+      high: 550,
+      note: "оцинкованный; с полимерным покрытием дороже",
+      sources: [
+        { name: "МК4С — профнастил С8", url: "https://mk4s.ru/krovlya/profnastil/s8/" },
+        { name: "Евромет — профнастил С8 0,5 мм", url: "https://evromet-m.ru/products/profnastil/profnastil-s8-05-mm-otsinkovannyj/" }
+      ]
+    },
+    // ── Стройматериалы ──
+    {
+      id: "cement",
+      name: "Цемент М500 (ЦЕМ I 42,5), мешок 50 кг",
+      match: /цемент/,
+      unit: "мешок",
+      low: 580,
+      high: 710,
+      convert: { т: 20, кг: 1 / 50 },
+      note: "навалом в цементовозе дешевле",
+      sources: [
+        { name: "Лемана ПРО — цемент Цемрос М500 50 кг", url: "https://voronezh.lemanapro.ru/product/cement-cemros-m500-cem-i-425-n-50-kg-82134939/" },
+        { name: "Лемана ПРО — цемент М500 50 кг (Красноярск)", url: "https://krasnoyarsk.lemanapro.ru/product/cement-sibirskiy-cement-m500-cem-i-425-n-50-kg-82569944/" }
+      ]
+    },
+    {
+      id: "gazobeton",
+      name: "Газобетон D500",
+      match: /(газобетон|газоблок|газосиликат)/,
+      unit: "м3",
+      low: 6300,
+      high: 7400,
+      note: "с учётом скидок за объём до 15%",
+      sources: [{ name: "Bonolit — стеновой блок D500", url: "https://bonolit.ru/products/stenovye-bloki/d500/stenovoy-blok-d500-300mm/" }]
+    },
+    {
+      id: "kirpich",
+      name: "Кирпич М150",
+      match: /кирпич/,
+      unit: "шт",
+      low: 10,
+      high: 23,
+      note: "рядовой дешевле, облицовочный дороже",
+      sources: [
+        { name: "Кирпич.ру — облицовочный М150", url: "https://www.kirpich.ru/kirpich-oblicovochnyy-m150/" },
+        { name: "В-Кирпич — пустотелый М150", url: "https://www.v-kirpich.ru/catalog/stroitelnyy-pustotelyy-kirpich/m-150/" }
+      ]
+    },
+    {
+      id: "gkl",
+      name: "Гипсокартон ГКЛ 12,5 мм",
+      match: /(гипсокартон|(^|[^а-я])гкл)/,
+      unit: "лист",
+      low: 375,
+      high: 615,
+      sources: [
+        { name: "ОптоСтрой — ГКЛ Knauf 12,5 мм", url: "https://optostroy.com/products/125-mm-gkl-knauf/" },
+        { name: "РД Строй — ГКЛ 12,5 мм", url: "https://rdstroy.ru/catalog/knauf_3/gipsokarton_gkl_12_5_1200_2500_knauf_list_286198/" }
+      ]
+    },
+    {
+      id: "minvata",
+      name: "Каменная вата (Роклайт)",
+      match: /(минват|минеральн\S* ват|каменн\S* ват|утеплител)/,
+      unit: "м3",
+      low: 2600,
+      high: 3100,
+      note: "плиты 50 мм, плотность 30–35 кг/м³",
+      sources: [
+        { name: "Лукос-Строй — Роклайт 50 мм", url: "https://lukos-stroy.ru/teploizolyacionnye-materialy/mineralnaya-vata/uteplitel-tehnonikol-roklayt-1200x600x50mm-5-76m2-0-28m3" },
+        { name: "Рем52 — Роклайт", url: "https://rem52.ru/utepliteli/tekhnonikol/roklajt/" }
+      ]
+    },
+    // ── Упаковка ──
+    {
+      id: "gofrokorob",
+      name: "Гофрокороб 600×400×400 Т-23",
+      match: /(гофрокороб|гофроящик|(^|[^а-я])короб)/,
+      unit: "шт",
+      low: 56,
+      high: 77,
+      note: "цена сильно зависит от размера, марки картона и печати",
+      sources: [
+        { name: "Гофро-Картон — короб 600×400×400 Т-23", url: "https://gofro-karton.com/gofrokorob_600x400x400/" },
+        { name: "Лесбумтара — короб 600×400×400 Т-23", url: "https://lesbumtara.ru/catalog/kartonnye-korobki/gofrokorob-600x400x400-t-23/" }
+      ]
+    },
+    {
+      id: "stretch",
+      name: "Стретч-плёнка первичная 500 мм",
+      match: /стре[тй]?[тй]ч/,
+      unit: "кг",
+      low: 180,
+      high: 220,
+      sources: [{ name: "СтретчПак — первичная плёнка 500 мм", url: "https://stretchpak.ru/stretch-plenka/pervichnaya/" }]
+    },
+    {
+      id: "poddon",
+      name: "Европоддон 1200×800",
+      match: /(поддон|паллет)/,
+      unit: "шт",
+      low: 360,
+      high: 850,
+      note: "б/у дешевле, новые с клеймом EPAL дороже",
+      sources: [
+        { name: "Поддон-Опт — европоддон 1200×800", url: "https://poddon-opt.ru/evropoddon/evropoddon-1200x800-mm/" },
+        { name: "КМЦ-Поддон — европоддоны 1200×800", url: "https://www.kmc-poddon.ru/category/evropoddony/evropoddony-1200-800/" }
+      ]
+    },
+    // ── Продукты для HoReCa ──
+    {
+      id: "grechka",
+      name: "Гречка ядрица",
+      match: /гречк|гречнев/,
+      unit: "кг",
+      low: 47,
+      high: 50,
+      note: "мешки 50 кг",
+      sources: [{ name: "Агрос — гречневая крупа оптом", url: "https://agrosfood.ru/katalog/krupyi/grechnevaya-krupa" }]
+    },
+    {
+      id: "ris",
+      name: "Рис круглозёрный",
+      match: /(^|[^а-я])рис([^а-я]|$)|рисов/,
+      unit: "кг",
+      low: 58,
+      high: 80,
+      note: "мешки 25 кг",
+      sources: [
+        { name: "Агрос — рис оптом", url: "https://agrosfood.ru/katalog/krupyi/ris" },
+        { name: "НаПолке — рис круглозёрный 25 кг", url: "https://napolke.ru/catalog/horeca/bakaleya_horeca/product/ris_kruglozerny_j_25_kg_meshok-3bd6c9e3-7e32-42be-b1a3-d62e45eb7a75" }
+      ]
+    },
+    {
+      id: "maslo",
+      name: "Масло подсолнечное рафинированное",
+      match: /(подсолнечн|растительн\S* масл)/,
+      unit: "л",
+      low: 90,
+      high: 140,
+      typical: 115,
+      convert: { кг: 1.087, т: 1087 },
+      note: "фасовка 1–5 л; наливом дешевле",
+      sources: [{ name: "Регторг — объявления о продаже масла оптом", url: "https://www.regtorg.ru/goods/maslo-podsolnechnoe-rafinirovannoe/" }]
+    },
+    {
+      id: "kofe",
+      name: "Кофе в зёрнах для HoReCa",
+      match: /кофе/,
+      unit: "кг",
+      low: 1200,
+      high: 3450,
+      sources: [{ name: "КультКофе — кофе в зёрнах оптом", url: "https://kultkofe.ru/kofe-arabika-v-zernah-optom" }]
+    },
+    {
+      id: "govyadina",
+      name: "Говядина (фарш, лопатка, мякоть)",
+      match: /(говядин|говяж)/,
+      unit: "кг",
+      low: 595,
+      high: 1150,
+      note: "вырезка дороже — около 2 000 ₽/кг",
+      sources: [
+        { name: "GFC — говядина оптом", url: "https://gfc-russia.ru/catalog/myaso-i-ptitsa/govyadina-telyatina" },
+        { name: "Meatinfo — объявления о продаже мяса", url: "https://meatinfo.ru/all/trade/meat/sale" }
+      ]
+    },
+    {
+      id: "kurica",
+      name: "Куриное филе",
+      match: /(курин|куриц|цыпл)/,
+      unit: "кг",
+      low: 520,
+      high: 710,
+      sources: [{ name: "GFC — курица оптом", url: "https://gfc-russia.ru/catalog/myaso-i-ptitsa/kurica" }]
+    },
+    // ── Канцтовары и офис ──
+    {
+      id: "bumaga",
+      name: "Бумага А4, 80 г/м², 500 листов",
+      match: /(бумаг\S* (для )?(офис|принтер|печат)|офисн\S* бумаг|(^|[^а-я0-9])а4([^а-я0-9]|$))/,
+      unit: "пачка",
+      low: 340,
+      high: 395,
+      convert: { коробка: 5 },
+      sources: [
+        { name: "МКФ Групп — SvetoCopy Classic А4", url: "https://mkfgroup.ru/parts/bumaga-ofisnaya-a4-80-g-m2-500-l-marka-s-svetocopy-classic-rossiya.html" },
+        { name: "Pro100snab — SvetoCopy Classic А4", url: "https://pro100snab.ru/catalog/bumaga/bumaga_dlya_ofisnoy_tekhniki-419524/bumaga_belaya_marok_a_v_s/bumaga-ofisnaya-svetocopy-classic-a4-80-gm2-500-l-marka-s-international-paper-belizna-146/" }
+      ]
+    },
+    {
+      id: "kreslo",
+      name: "Кресло для персонала",
+      match: /кресл/,
+      unit: "шт",
+      low: 3600,
+      high: 23500,
+      typical: 8500,
+      sources: [{ name: "Феликс — кресла для персонала", url: "https://www.felix.ru/catalog/kresla-i-stulya/kresla-dlya-personala/" }]
+    },
+    // ── Электротехника ──
+    {
+      id: "vvg-3x2-5",
+      name: "Кабель ВВГнг(А)-LS 3×2,5",
+      match: /ввг.*3\s*[хx×*]\s*2[.,]5/,
+      unit: "м",
+      low: 65,
+      high: 112,
+      note: "по ГОСТ; кабель по ТУ дешевле",
+      sources: [
+        { name: "СИП2-Кабель — ВВГнг(А)-LS 3×2,5", url: "https://www.sip2-kabel.ru/cabel_vvgng_ls_3x2_5_1.html" },
+        { name: "Электроград — ВВГнг-LS 3×2,5", url: "https://electrograd.pro/product/vvgng-3kh2-5-ls-p-gost/" }
+      ]
+    },
+    {
+      id: "svetilnik",
+      name: "Светильник LED 595×595, 36–40 Вт",
+      match: /светильник/,
+      unit: "шт",
+      low: 530,
+      high: 1650,
+      note: "офисный; уличные и промышленные дороже",
+      sources: [
+        { name: "Мир Светодиодов — светильники 595×595", url: "https://mir-svetodiodov.ru/ofisnye-svetodiodnye-svetilniki/svetilniki-dlya-ofisa-595-595" },
+        { name: "ЭлектроЛайт — Gauss 36 Вт 595×595", url: "https://www.elektrolight.ru/svetilniki/svetodiodnye/ofisnye/svetilnik-svetodiodnyy-ofisnyy-36vt-595kh595kh19mm-6500k-ip20-gauss-842123336/" }
+      ]
+    },
+    // ── Спецодежда и СИЗ ──
+    {
+      id: "kostyum",
+      name: "Костюм рабочий летний",
+      match: /(костюм|полукомбинезон|спецодежд)/,
+      unit: "шт",
+      low: 2e3,
+      high: 14900,
+      typical: 4500,
+      sources: [{ name: "Техноавиа — летние костюмы", url: "https://www.technoavia.ru/katalog/spetsodezhda/letnyaya/summer_costumes" }]
+    },
+    {
+      id: "perchatki",
+      name: "Перчатки х/б с ПВХ",
+      match: /перчатк/,
+      unit: "пара",
+      low: 4,
+      high: 24,
+      sources: [
+        { name: "Фатекс — перчатки х/б с ПВХ оптом", url: "https://fatex37.ru/katalog/perchatki-hb-s-pvh/" },
+        { name: "САБ-2000 — перчатки х/б с ПВХ", url: "https://sab2000.ru/cat/rabochie-perchatki/hb-s-pvh/item/perchatki-hb-per1007/" }
+      ]
+    }
+  ];
+  var UNIT_LABEL = {
+    т: "т",
+    кг: "кг",
+    шт: "шт",
+    м: "м",
+    м2: "м²",
+    м3: "м³",
+    л: "л",
+    пачка: "пачка",
+    лист: "лист",
+    мешок: "мешок",
+    пара: "пара",
+    коробка: "коробка"
+  };
+  var UNIT_WORDS = [
+    [/^(тонн\S*|тн|т)$/, "т"],
+    [/^(кг|килограмм\S*)$/, "кг"],
+    [/^(шт|штук\S*|ед)$/, "шт"],
+    [/^(м2|м²|кв\.?м|квм|кв)$/, "м2"],
+    [/^(м3|м³|куб\S*)$/, "м3"],
+    [/^(м|метр\S*|пог\.?м|мп)$/, "м"],
+    [/^(л|литр\S*)$/, "л"],
+    [/^(пач\S*)$/, "пачка"],
+    [/^(лист\S*)$/, "лист"],
+    [/^(меш\S*)$/, "мешок"],
+    [/^(пар\S*)$/, "пара"],
+    [/^(короб\S*|кор)$/, "коробка"]
+  ];
+  var UNIT_FORMS = {
+    мешок: ["мешок", "мешка", "мешков"],
+    пачка: ["пачка", "пачки", "пачек"],
+    лист: ["лист", "листа", "листов"],
+    пара: ["пара", "пары", "пар"],
+    коробка: ["коробка", "коробки", "коробок"]
+  };
+  function qtyLabel(n, unit) {
+    const num = n.toLocaleString("ru-RU", { maximumFractionDigits: 2 });
+    const forms = UNIT_FORMS[unit];
+    if (!forms) return `${num} ${UNIT_LABEL[unit]}`;
+    if (!Number.isInteger(n)) return `${num} ${forms[1]}`;
+    const a = n % 10, b = n % 100;
+    return `${num} ${a === 1 && b !== 11 ? forms[0] : a >= 2 && a <= 4 && (b < 10 || b >= 20) ? forms[1] : forms[2]}`;
+  }
+  var norm = (s) => s.toLowerCase().replace(/ё/g, "е").replace(/ /g, " ");
+  function parseQuantity(text) {
+    if (!text) return null;
+    const m = norm(text).match(/(\d[\d\s]*(?:[.,]\d+)?)\s*(тыс\.?\s*)?([a-zа-я²³0-9.]*)/i);
+    if (!m) return null;
+    let qty = Number(m[1].replace(/\s/g, "").replace(",", "."));
+    if (!Number.isFinite(qty) || qty <= 0) return null;
+    if (m[2]) qty *= 1e3;
+    const raw = m[3].replace(/\.$/, "");
+    if (!raw) return { qty, unit: null, raw: null };
+    const hit = UNIT_WORDS.find(([re]) => re.test(raw));
+    return { qty, unit: hit ? hit[1] : null, raw };
+  }
+  function findPriceItem(title) {
+    var _a;
+    if (!title) return null;
+    const t = norm(title);
+    return (_a = PRICE_ITEMS.find((it) => it.match.test(t))) != null ? _a : null;
+  }
+  function factor(item, from) {
+    var _a;
+    if (from === item.unit) return 1;
+    if (((_a = item.convert) == null ? void 0 : _a[from]) !== void 0) return item.convert[from];
+    if (from === "т" && item.unit === "кг") return 1e3;
+    if (from === "кг" && item.unit === "т") return 1e-3;
+    return null;
+  }
+  function estimateGoods(title, quantity) {
+    var _a, _b, _c;
+    const item = findPriceItem(title);
+    if (!item) return { ok: false, item: null, reason: "no-item" };
+    const q = parseQuantity(quantity);
+    if (!q) return { ok: false, item, reason: "no-quantity" };
+    const f = factor(item, (_a = q.unit) != null ? _a : item.unit);
+    if (f === null) return { ok: false, item, reason: "unit", unitLabel: (_b = q.raw) != null ? _b : void 0 };
+    const amount = q.qty * f;
+    return {
+      ok: true,
+      item,
+      qty: q.qty,
+      unit: (_c = q.unit) != null ? _c : item.unit,
+      amount,
+      low: amount * item.low,
+      high: amount * item.high,
+      typical: item.typical ? amount * item.typical : null
+    };
+  }
+  function roundStep(n) {
+    return n >= 1e6 ? 1e4 : n >= 1e4 ? 1e3 : n >= 1e3 ? 100 : 10;
+  }
+  function moneyRange(low, high) {
+    const f = (n) => n.toLocaleString("ru-RU");
+    const lo = Math.floor(low / roundStep(low)) * roundStep(low);
+    const hi = Math.ceil(high / roundStep(high)) * roundStep(high);
+    return lo === hi ? `≈ ${f(lo)} ₽` : `≈ ${f(lo)}–${f(hi)} ₽`;
+  }
+  function moneyApprox(n) {
+    return `≈ ${(Math.round(n / roundStep(n)) * roundStep(n)).toLocaleString("ru-RU")} ₽`;
+  }
+  function unitPrice(item) {
+    const f = (n) => n.toLocaleString("ru-RU");
+    return `${f(item.low)}–${f(item.high)} ₽/${UNIT_LABEL[item.unit]}`;
+  }
+  var PRICE_ITEM_NAMES = PRICE_ITEMS.map((i) => i.name.split(/[ ,(]/)[0].toLowerCase());
+  return __toCommonJS(prices_exports);
+})();
+
+</script>
+<script>
+// Данные поставщиков: реальные компании из data/real-suppliers.tsиз полной версии
+const DATA = {"categories":[{"slug":"metalloprokat","name":"Металлопрокат","children":[{"slug":"armatura","name":"Арматура"},{"slug":"truby","name":"Трубы"},{"slug":"listovoy-prokat","name":"Листовой прокат"}]},{"slug":"stroymaterialy","name":"Стройматериалы","children":[{"slug":"cement","name":"Цемент и сухие смеси"},{"slug":"kirpich-bloki","name":"Кирпич и блоки"},{"slug":"uteplitel","name":"Утеплители и кровля"}]},{"slug":"upakovka","name":"Упаковка","children":[{"slug":"gofrokorob","name":"Гофрокороб"},{"slug":"stretch-plenka","name":"Стретч-плёнка"},{"slug":"poddony","name":"Поддоны"}]},{"slug":"produkty-horeca","name":"Продукты и HoReCa","children":[{"slug":"bakaleya","name":"Бакалея и масла"},{"slug":"molochnaya-produkciya","name":"Молочная продукция"},{"slug":"myaso","name":"Мясо и птица"},{"slug":"kofe-chay","name":"Кофе и чай"}]},{"slug":"ofis","name":"Офис и канцелярия","children":[{"slug":"bumaga","name":"Канцтовары и бумага"},{"slug":"ofisnaya-mebel","name":"Офисная мебель"}]},{"slug":"elektrotehnika","name":"Электротехника","children":[{"slug":"kabel","name":"Кабель и провод"},{"slug":"svetilniki","name":"Светильники"}]},{"slug":"specodezhda-siz","name":"Спецодежда и СИЗ","children":[{"slug":"specodezhda","name":"Спецодежда"},{"slug":"siz","name":"Средства защиты"}]},{"slug":"logistika","name":"Логистика","children":[{"slug":"gruzoperevozki","name":"Грузоперевозки"},{"slug":"skladskoe-hranenie","name":"Складское хранение"}]}],"suppliers":[{"slug":"metallservis","name":"Металлсервис","legalName":null,"description":"Один из крупнейших металлотрейдеров страны: чёрный, нержавеющий и цветной прокат, электросварные трубы, обработка металла. Сеть металлобаз и сервисных центров в Москве, Подмосковье и регионах.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://mc.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://mc.ru/company/branches","majorNote":"один из крупнейших металлотрейдеров страны, сеть металлобаз в Москве и регионах","rating":0,"reviewsCount":0,"order":0,"categories":["armatura","metalloprokat","truby","listovoy-prokat"],"products":[],"reviews":[]},{"slug":"spk","name":"Сталепромышленная компания","legalName":null,"description":"Оптовая и розничная торговля металлопрокатом, металлообработка и выпуск профилей, в том числе профильной трубы и сэндвич-панелей.","region":"Свердловская область","city":"Екатеринбург","foundedYear":1991,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.spk.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://cyclowiki.org/wiki/Сталепромышленная_компания","majorNote":"работает с 1991 года, металлобазы в разных городах России","rating":0,"reviewsCount":0,"order":1,"categories":["armatura","metalloprokat","truby","listovoy-prokat"],"products":[],"reviews":[]},{"slug":"brokinvest","name":"Брок-Инвест-Сервис","legalName":null,"description":"Чёрный металлопрокат и металлообработка: трубы, профили, лента из рулона, гнутый швеллер. Доставка и упаковка металла. На рынке металлоторговли с 1991 года.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://brokinvest.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://career.habr.com/companies/brokinvest","majorNote":null,"rating":0,"reviewsCount":0,"order":2,"categories":["truby","metalloprokat","listovoy-prokat"],"products":[],"reviews":[]},{"slug":"metallotorg","name":"Металлоторг","legalName":"АО «Металлоторг»","description":"Оптовая торговля чёрным металлопрокатом с собственных металлобаз в центре, на юге и северо-западе России, резка и гибка, изготовление металлоконструкций. Работает с 1992 года.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"http://metallotorg.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://hh.ru/employer/9533","majorNote":"работает с 1992 года, свои металлобазы в центре, на юге и северо-западе России","rating":0,"reviewsCount":0,"order":3,"categories":["armatura","metalloprokat","truby","listovoy-prokat"],"products":[],"reviews":[]},{"slug":"metallokomplekt-m","name":"Металлокомплект-М","legalName":"АО «Металлокомплект-М»","description":"Дистрибьютор металлопродукции: комплексные поставки чёрного металла по России, лист, арматура, трубы, сортовой и фасонный прокат, обработка по заданию клиента.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"http://mkm-metal.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://hh.ru/employer/414","majorNote":null,"rating":0,"reviewsCount":0,"order":4,"categories":["armatura","metalloprokat","truby","listovoy-prokat"],"products":[],"reviews":[]},{"slug":"metall-profil","name":"Металл Профиль","legalName":"ООО «Компания Металл Профиль»","description":"Производитель тонколистовых кровельных и стеновых материалов: профнастил, металлочерепица, сэндвич-панели, водосточные и фасадные системы.","region":"Московская область","city":"Лобня","foundedYear":1996,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.metallprofil.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://cyclowiki.org/wiki/Металл_Профиль","majorNote":"производитель кровли и фасадов с 1996 года, заводы в разных регионах","rating":0,"reviewsCount":0,"order":5,"categories":["listovoy-prokat","metalloprokat"],"products":[],"reviews":[]},{"slug":"petrovich","name":"Петрович","legalName":"ООО «СТД «Петрович»","description":"Строительный торговый дом с отдельным направлением для юридических лиц: стройматериалы, сухие смеси, утеплители, кирпич и блоки с доставкой на объект.","region":"Санкт-Петербург","city":"Санкт-Петербург","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://business.petrovich.ru","email":null,"phone":null,"isClaimed":false,"inn":"7802348846","sourceUrl":"https://www.rusprofile.ru/id/1899042","majorNote":"крупная строительная сеть Санкт-Петербурга и Москвы, отдел продаж для юрлиц","rating":0,"reviewsCount":0,"order":6,"categories":["cement","stroymaterialy","kirpich-bloki","uteplitel"],"products":[],"reviews":[]},{"slug":"tehnonikol","name":"ТЕХНОНИКОЛЬ","legalName":null,"description":"Производитель кровельных, гидроизоляционных и теплоизоляционных материалов. Поставки через сеть дилеров и представительств по России.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.tn.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://www.tn.ru/catalogue/krovelnye-materialy-i-ehlementy-skatnoj-kryshi/","majorNote":"производитель с сетью дилеров и представительств по всей России","rating":0,"reviewsCount":0,"order":7,"categories":["uteplitel","stroymaterialy"],"products":[],"reviews":[]},{"slug":"bonolit","name":"Bonolit","legalName":null,"description":"Завод газобетонных блоков в Подмосковье: стеновые и перегородочные блоки, клей и сопутствующие материалы.","region":"Московская область","city":"Старая Купавна","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://bonolit.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://bonolit.ru/contacts/kupavna/","majorNote":null,"rating":0,"reviewsCount":0,"order":8,"categories":["kirpich-bloki","stroymaterialy"],"products":[],"reviews":[]},{"slug":"knauf-gips","name":"КНАУФ ГИПС","legalName":"ООО «КНАУФ ГИПС»","description":"Производитель гипсокартона, сухих строительных смесей и комплектных систем для отделки. Сбытовые дирекции в регионах России.","region":"Московская область","city":"Красногорск","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.knauf.ru","email":null,"phone":null,"isClaimed":false,"inn":"5024051564","sourceUrl":"https://www.knauf.ru/about/contact-info/sales/","majorNote":"производитель гипсокартона и смесей, сбытовые дирекции в регионах России","rating":0,"reviewsCount":0,"order":9,"categories":["cement","stroymaterialy"],"products":[],"reviews":[]},{"slug":"lsr-stenovye","name":"ЛСР Стеновые","legalName":null,"description":"Производство кирпича и газобетона группы ЛСР на заводах в Ленинградской и Московской областях, поставки в Санкт-Петербурге и Москве.","region":"Санкт-Петербург","city":"Санкт-Петербург","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://lsrstena.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://lsrstena.ru/","majorNote":"заводы группы ЛСР в Ленинградской и Московской областях","rating":0,"reviewsCount":0,"order":10,"categories":["kirpich-bloki","stroymaterialy"],"products":[],"reviews":[]},{"slug":"cemros","name":"ЦЕМРОС","legalName":"АО «ЦЕМРОС»","description":"Цементный холдинг (ранее «Евроцемент груп»): цемент и сухие строительные смеси с заводов в разных регионах, есть собственный интернет-магазин для оптовых покупателей.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://cemros.ru","email":null,"phone":null,"isClaimed":false,"inn":"7708117908","sourceUrl":"https://companies.rbc.ru/id/1027739128141-tsemros/","majorNote":"цементный холдинг с заводами в разных регионах России","rating":0,"reviewsCount":0,"order":11,"categories":["cement","stroymaterialy"],"products":[],"reviews":[]},{"slug":"gofromir","name":"ГофроМир","legalName":null,"description":"Группа компаний по производству гофроупаковки: стандартные и заказные коробки с печатью, воздушно-пузырчатая плёнка, упаковочные материалы, разработка конструкции упаковки.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://gofromir.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://gofromir.ru/","majorNote":null,"rating":0,"reviewsCount":0,"order":12,"categories":["gofrokorob","upakovka"],"products":[],"reviews":[]},{"slug":"pp-gofrokombinat","name":"Павлово-Посадский Гофрокомбинат","legalName":"ООО «ПП Гофрокомбинат»","description":"Производство гофрокартона и гофротары: короба, лотки, влагостойкая упаковка, высечка, флексопечать до 4 цветов. Площадки в Павловском Посаде, Ступине и Краснодаре.","region":"Московская область","city":"Павловский Посад","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://ppgk.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://ppgk.ru/","majorNote":"производство в Павловском Посаде, Ступине и Краснодаре","rating":0,"reviewsCount":0,"order":13,"categories":["gofrokorob","upakovka"],"products":[],"reviews":[]},{"slug":"profplenka","name":"Профплёнка","legalName":null,"description":"Производство стретч-плёнки в Москве.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://rustehprom-polimer.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://rustehprom-polimer.ru/","majorNote":null,"rating":0,"reviewsCount":0,"order":14,"categories":["stretch-plenka","upakovka"],"products":[],"reviews":[]},{"slug":"evropallet","name":"Европаллет","legalName":null,"description":"Производство и продажа деревянных поддонов: европоддоны, новые и б/у, стандартные и нестандартные размеры, паллетные крышки и борта.","region":"Московская область","city":"Воскресенский район","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://pallet.expert","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://pallet.expert/","majorNote":null,"rating":0,"reviewsCount":0,"order":15,"categories":["poddony","upakovka"],"products":[],"reviews":[]},{"slug":"evrotara","name":"Евротара","legalName":"ООО «ЕВРОТАРА»","description":"Производство деревянных поддонов стандартных европейских размеров и по чертежам заказчика.","region":"Санкт-Петербург","city":"Санкт-Петербург","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://eurotara.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://eurotara.ru/proizvodstvo/","majorNote":null,"rating":0,"reviewsCount":0,"order":16,"categories":["poddony","upakovka"],"products":[],"reviews":[]},{"slug":"orimi","name":"Орими Трэйд","legalName":null,"description":"Производитель чая и кофе с отдельным направлением для HoReCa.","region":"Санкт-Петербург","city":"Санкт-Петербург","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.orimi.com","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://www.orimi.com/partneram/napravlenie-horeca/","majorNote":"крупный производитель чая и кофе","rating":0,"reviewsCount":0,"order":17,"categories":["kofe-chay","produkty-horeca"],"products":[],"reviews":[]},{"slug":"efko","name":"ЭФКО","legalName":"АО «ЭФКО»","description":"Производитель масложировой продукции: растительные масла, жиры и пищевые ингредиенты для пищевой промышленности и HoReCa.","region":"Белгородская область","city":"Алексеевка","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://b2b.efko.ru","email":null,"phone":null,"isClaimed":false,"inn":"3122000300","sourceUrl":"https://b2b.efko.ru/about/","majorNote":"один из крупнейших производителей масложировой продукции в России","rating":0,"reviewsCount":0,"order":18,"categories":["bakaleya","produkty-horeca"],"products":[],"reviews":[]},{"slug":"agro-alyans","name":"Агро-Альянс","legalName":"ООО «Агро-Альянс»","description":"Агропромышленный холдинг: рис, гречка, бобовые и другие крупы оптом от производителя.","region":"Санкт-Петербург","city":"Санкт-Петербург","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.agro-al.ru","email":null,"phone":null,"isClaimed":false,"inn":"7814413641","sourceUrl":"https://www.agro-al.ru/about/","majorNote":null,"rating":0,"reviewsCount":0,"order":19,"categories":["bakaleya","produkty-horeca"],"products":[],"reviews":[]},{"slug":"molvest","name":"Молвест","legalName":"АО «Молвест»","description":"Молочный холдинг: молоко и молочная продукция, оптовые поставки.","region":"Воронежская область","city":"Воронеж","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":null,"email":null,"phone":null,"isClaimed":false,"inn":"3662104737","sourceUrl":"https://productcenter.ru/producers/7620/kompaniia-molviest","majorNote":null,"rating":0,"reviewsCount":0,"order":20,"categories":["molochnaya-produkciya","produkty-horeca"],"products":[],"reviews":[]},{"slug":"torrefacto","name":"Torrefacto","legalName":null,"description":"Обжарка кофе в Москве, отдельное направление оптовых поставок свежеобжаренного кофе.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.torrefacto.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://www.torrefacto.ru/wholesale/","majorNote":null,"rating":0,"reviewsCount":0,"order":21,"categories":["kofe-chay","produkty-horeca"],"products":[],"reviews":[]},{"slug":"miratorg","name":"Мираторг","legalName":null,"description":"Агрохолдинг, производитель мяса и мясной продукции, отдельное направление поставок для HoReCa.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://miratorg.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://miratorg.ru/business/horeca/index1.php","majorNote":"крупный агрохолдинг, производитель мяса","rating":0,"reviewsCount":0,"order":22,"categories":["myaso","produkty-horeca"],"products":[],"reviews":[]},{"slug":"komus","name":"Комус","legalName":null,"description":"Комплексный поставщик товаров для офиса и бизнеса: канцелярия, бумага, офисная мебель и техника, хозяйственные товары, есть собственное производство.","region":"Москва","city":"Москва","foundedYear":1990,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.komus.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://en.wikipedia.org/wiki/Komus_(company)","majorNote":"на рынке с 1990 года, своё производство и поставки по России","rating":0,"reviewsCount":0,"order":23,"categories":["bumaga","ofis","ofisnaya-mebel"],"products":[],"reviews":[]},{"slug":"officemag","name":"Офисмаг","legalName":"ООО «Офисмаг»","description":"Интернет-поставщик товаров для офиса с доставкой для бизнеса, склад в Домодедове.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.officemag.ru","email":null,"phone":null,"isClaimed":false,"inn":"5009062762","sourceUrl":"https://www.officemag.ru/company/contacts/index.php?FILIAL=rf","majorNote":null,"rating":0,"reviewsCount":0,"order":24,"categories":["bumaga","ofis"],"products":[],"reviews":[]},{"slug":"samson-opt","name":"Самсон-опт","legalName":null,"description":"Оптовые поставки канцелярских, офисных и школьных товаров по России.","region":"Воронежская область","city":"Воронеж","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.samsonopt.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://kanzoboz.ru/firms/samson/","majorNote":null,"rating":0,"reviewsCount":0,"order":25,"categories":["bumaga","ofis"],"products":[],"reviews":[]},{"slug":"alsav","name":"Алсав","legalName":null,"description":"Производитель офисной мебели: мебель для персонала и руководителей, переговорные столы, системы хранения, акустические перегородки.","region":"Московская область","city":"Щёлково","foundedYear":1999,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://alsav.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://alsav.ru/proizvodstvo/","majorNote":null,"rating":0,"reviewsCount":0,"order":26,"categories":["ofisnaya-mebel","ofis"],"products":[],"reviews":[]},{"slug":"pervaya-mebelnaya","name":"Первая мебельная фабрика","legalName":"ЗАО «Первая Мебельная»","description":"Мебельная фабрика: корпусная мебель на заказ, комплексное оснащение помещений для компаний, гостиниц и учреждений.","region":"Санкт-Петербург","city":"Санкт-Петербург","foundedYear":1945,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.1mf.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://www.1mf.ru/about/","majorNote":null,"rating":0,"reviewsCount":0,"order":27,"categories":["ofisnaya-mebel","ofis"],"products":[],"reviews":[]},{"slug":"etm","name":"ЭТМ","legalName":"ООО «ЭТМ»","description":"Дистрибьютор электротехнического оборудования: кабель, светотехника, электроустановочные изделия, широкий ассортимент со склада.","region":"Санкт-Петербург","city":"Санкт-Петербург","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.etm.ru","email":null,"phone":null,"isClaimed":false,"inn":"7804274156","sourceUrl":"https://www.elec.ru/catalog/etm/contacts/","majorNote":"дистрибьютор электротехники с филиалами по всей России","rating":0,"reviewsCount":0,"order":28,"categories":["kabel","elektrotehnika","svetilniki"],"products":[],"reviews":[]},{"slug":"russkiy-svet","name":"Русский Свет","legalName":null,"description":"Поставщик электротехники и светотехники: кабельно-проводниковая продукция, оборудование низкого и высокого напряжения, кабеленесущие системы. Большая сеть филиалов.","region":"Тверская область","city":"Тверь","foundedYear":1995,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://russvet.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://www.elec.ru/catalog/rus-svet/","majorNote":"на рынке с 1995 года, большая сеть филиалов","rating":0,"reviewsCount":0,"order":29,"categories":["kabel","elektrotehnika","svetilniki"],"products":[],"reviews":[]},{"slug":"elektrokabel-kz","name":"Электрокабель Кольчугинский завод","legalName":"АО «Электрокабель» Кольчугинский завод»","description":"Кабельный завод: силовые кабели с изоляцией из сшитого полиэтилена на 6–35 кВ и другая кабельная продукция.","region":"Владимирская область","city":"Кольчугино","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://elcable.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://www.tek-all.ru/companies/71-elektrokabel-kolchuginskiy-zavod/","majorNote":null,"rating":0,"reviewsCount":0,"order":30,"categories":["kabel","elektrotehnika"],"products":[],"reviews":[]},{"slug":"sevkabel","name":"Севкабель","legalName":null,"description":"Один из старейших кабельных заводов России: кабельно-проводниковая продукция.","region":"Санкт-Петербург","city":"Санкт-Петербург","foundedYear":1879,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://sevcable.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://ru.wikipedia.org/wiki/Севкабель","majorNote":"один из старейших кабельных заводов России, работает с 1879 года","rating":0,"reviewsCount":0,"order":31,"categories":["kabel","elektrotehnika"],"products":[],"reviews":[]},{"slug":"feron","name":"Feron","legalName":null,"description":"Поставщик светотехники под марками Feron и Feron.PRO и электротоваров Stekker: лампы, светильники, светодиодные ленты.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://feron.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://feron.ru/about/","majorNote":null,"rating":0,"reviewsCount":0,"order":32,"categories":["svetilniki","elektrotehnika"],"products":[],"reviews":[]},{"slug":"svetovye-tehnologii","name":"Световые Технологии","legalName":null,"description":"Производитель светильников для улиц, промышленности, офисов и торговли, аварийного освещения и систем управления светом.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.ltcompany.com","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://lindex.ru/brands/svetovye-tekhnologii/","majorNote":"один из крупных российских производителей светильников","rating":0,"reviewsCount":0,"order":33,"categories":["svetilniki","elektrotehnika"],"products":[],"reviews":[]},{"slug":"vostok-servis","name":"Восток-Сервис","legalName":null,"description":"Спецодежда, спецобувь и средства индивидуальной защиты. Сеть региональных компаний и магазинов.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://vostok.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://vostok.ru/catalog/","majorNote":"сеть региональных компаний и магазинов спецодежды","rating":0,"reviewsCount":0,"order":34,"categories":["specodezhda","specodezhda-siz","siz"],"products":[],"reviews":[]},{"slug":"tehnoavia","name":"Техноавиа","legalName":null,"description":"Производство и продажа спецодежды, спецобуви и СИЗ оптом и в розницу.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.technoavia.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://www.technoavia.ru/company","majorNote":"производство и магазины спецодежды в разных городах России","rating":0,"reviewsCount":0,"order":35,"categories":["specodezhda","specodezhda-siz","siz"],"products":[],"reviews":[]},{"slug":"energokontrakt","name":"Энергоконтракт","legalName":"АО «ФПГ Энергоконтракт»","description":"Производитель защитной спецодежды, в том числе огнестойкой и для сварщиков.","region":"Москва","city":"Москва","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://energocontract.ru","email":null,"phone":null,"isClaimed":false,"inn":"7703268269","sourceUrl":"https://www.rusprofile.ru/id/4110686","majorNote":null,"rating":0,"reviewsCount":0,"order":36,"categories":["specodezhda","specodezhda-siz"],"products":[],"reviews":[]},{"slug":"ao-vm","name":"АО ВМ","legalName":null,"description":"Производитель средств защиты органов дыхания: респираторы, маски, фильтры и комплектующие.","region":"Московская область","city":"Волоколамск","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.vmplant.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://www.vmplant.ru/","majorNote":null,"rating":0,"reviewsCount":0,"order":37,"categories":["siz","specodezhda-siz"],"products":[],"reviews":[]},{"slug":"ural-partner","name":"Урал-Партнёр","legalName":null,"description":"Фабрика рабочей одежды: летние и зимние рабочие костюмы, полукомбинезоны, головные уборы, рабочая обувь.","region":"Свердловская область","city":"Екатеринбург","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://uralpartner.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://productcenter.ru/producers/5304/fabrika-spietsodiezhdy-ural-partnier","majorNote":null,"rating":0,"reviewsCount":0,"order":38,"categories":["specodezhda","specodezhda-siz"],"products":[],"reviews":[]},{"slug":"pek","name":"ПЭК","legalName":"ООО «ПЭК»","description":"Транспортная компания: перевозка сборных грузов по России, 3PL-логистика и ответственное хранение. Более 300 подразделений.","region":"Москва","city":"Москва","foundedYear":2001,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://pecom.ru","email":null,"phone":null,"isClaimed":false,"inn":"7721823853","sourceUrl":"https://pecom.ru/entity/","majorNote":"более 300 подразделений по России","rating":0,"reviewsCount":0,"order":39,"categories":["gruzoperevozki","logistika","skladskoe-hranenie"],"products":[],"reviews":[]},{"slug":"delovye-linii","name":"Деловые Линии","legalName":null,"description":"Перевозка сборных грузов между терминалами, отдельные машины, доставка от двери до двери, авиа- и контейнерные перевозки, складская логистика.","region":"Санкт-Петербург","city":"Санкт-Петербург","foundedYear":2001,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.dellin.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://whoiswho.dp.ru/cart/company/2936962","majorNote":"работает с 2001 года, терминалы по всей России","rating":0,"reviewsCount":0,"order":40,"categories":["gruzoperevozki","logistika","skladskoe-hranenie"],"products":[],"reviews":[]},{"slug":"cdek","name":"СДЭК","legalName":null,"description":"Служба экспресс-доставки документов, посылок и грузов по России и за рубеж.","region":"Новосибирская область","city":"Новосибирск","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.cdek.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://transportnye-kompanii.com/sdek/","majorNote":"отделения по всей России и за рубежом","rating":0,"reviewsCount":0,"order":41,"categories":["gruzoperevozki","logistika"],"products":[],"reviews":[]},{"slug":"tk-kit","name":"ТК КИТ","legalName":null,"description":"Транспортная компания: грузоперевозки по России, Казахстану, Беларуси, Армении и Киргизии.","region":"Тюменская область","city":"Тюмень","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://tk-kit.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://www.orgpage.ru/tyumen/transportnaya-kompaniya-kit-2523195.html","majorNote":"грузоперевозки по России и в четыре страны СНГ","rating":0,"reviewsCount":0,"order":42,"categories":["gruzoperevozki","logistika"],"products":[],"reviews":[]},{"slug":"baikal-servis","name":"Байкал Сервис","legalName":"ООО «Байкал-Сервис ТК»","description":"Сборные и контейнерные грузы, авиаперевозки, доставка посылок до двери, погрузо-разгрузочные работы, страхование, складское хранение.","region":"Московская область","city":"Раменское","foundedYear":1994,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://www.baikalsr.ru","email":null,"phone":null,"isClaimed":false,"inn":"5001038736","sourceUrl":"https://cargotime.ru/carriers/bajkal-servis","majorNote":"работает с 1994 года, сборные и контейнерные перевозки по России","rating":0,"reviewsCount":0,"order":43,"categories":["gruzoperevozki","logistika","skladskoe-hranenie"],"products":[],"reviews":[]},{"slug":"monopoliya","name":"Монополия","legalName":null,"description":"Цифровая логистическая платформа, которая соединяет грузовладельцев и перевозчиков: поиск машин под груз, планирование рейсов, сервисы для перевозчиков.","region":"Санкт-Петербург","city":"Санкт-Петербург","foundedYear":null,"employees":null,"deliveryRegions":[],"minOrderRub":null,"paymentTerms":null,"deliveryTerms":null,"verified":false,"website":"https://monopoly.ru","email":null,"phone":null,"isClaimed":false,"inn":null,"sourceUrl":"https://career.habr.com/companies/monopoly","majorNote":null,"rating":0,"reviewsCount":0,"order":44,"categories":["gruzoperevozki","logistika"],"products":[],"reviews":[]}]};
+</script>
+<script>
+"use strict";
+
+// ── Утилиты ─────────────────────────────────────────────────
+const PAGE_SIZE = 10;
+const COMPARE_LIMIT = 4;
+const FAV_KEY = "snab:favorites";
+const CMP_KEY = "snab:compare";
+const RFQ_KEY = "snab:rfqs";
+const REQ_KEY = "snab:requests"; // обращения: один запрос нескольким поставщикам + их ответы
+const RFQ_MAX_SUPPLIERS = 10;
+
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const rubFmt = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 });
+const rub = (n) => (n === null || n === undefined ? "—" : `${rubFmt.format(n)} ₽`);
+const fmtRating = (v) => v.toLocaleString("ru-RU", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+/** «Екатеринбург, Свердловская область»; для городов-регионов — просто «Москва» */
+const place = (s) => esc(s.city === s.region ? s.city : `${s.city}, ${s.region}`);
+/** Атрибут href для ссылки, адрес которой вычисляется в коде.
+    Собирается по частям, чтобы сервисы публикации не принимали шаблон за ссылку на отдельный файл. */
+const hrefAttr = (url) => ["href", `"${esc(url)}"`].join("=");
+const fmtDate = (d) => new Date(d).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+
+/** Склонение: plural(5, ["поставщик", "поставщика", "поставщиков"]) */
+function plural(n, f) {
+  const a = n % 10, b = n % 100;
+  if (a === 1 && b !== 11) return f[0];
+  if (a >= 2 && a <= 4 && (b < 10 || b >= 20)) return f[1];
+  return f[2];
+}
+
+// ── Справочники ─────────────────────────────────────────────
+const CAT = {}; // slug → { name, parent }
+for (const p of DATA.categories) {
+  CAT[p.slug] = { name: p.name, parent: null };
+  for (const c of p.children) CAT[c.slug] = { name: c.name, parent: p.slug };
+}
+/** slug категории и всех её подкатегорий */
+function catScope(slug) {
+  if (!slug || !CAT[slug]) return null;
+  const parent = DATA.categories.find((p) => p.slug === slug);
+  return parent ? [slug, ...parent.children.map((c) => c.slug)] : [slug];
+}
+const leafCats = (s) => s.categories.filter((c) => CAT[c] && CAT[c].parent).map((c) => ({ slug: c, name: CAT[c].name }));
+const REGIONS = [...new Set(DATA.suppliers.flatMap((s) => [s.region, ...s.deliveryRegions]))].sort((a, b) => a.localeCompare(b, "ru"));
+const bySlug = (slug) => DATA.suppliers.find((s) => s.slug === slug);
+
+// ── Хранилище браузера: избранное, сравнение, запросы ────────
+function load(key) {
+  try { const v = JSON.parse(localStorage.getItem(key) || "[]"); return Array.isArray(v) ? v : []; } catch { return []; }
+}
+function save(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* хранилище недоступно — работаем до перезагрузки */ }
+  memory[key] = value;
+}
+const memory = {};
+const get = (key) => memory[key] ?? (memory[key] = load(key));
+
+function toggleFav(slug) {
+  const list = get(FAV_KEY);
+  save(FAV_KEY, list.includes(slug) ? list.filter((s) => s !== slug) : [slug, ...list]);
+  refreshMarks();
+}
+/** false — в сравнении уже максимум поставщиков */
+function toggleCmp(slug) {
+  const list = get(CMP_KEY);
+  if (list.includes(slug)) { save(CMP_KEY, list.filter((s) => s !== slug)); refreshMarks(); return true; }
+  if (list.length >= COMPARE_LIMIT) return false;
+  save(CMP_KEY, [...list, slug]);
+  refreshMarks();
+  return true;
+}
+
+
+// Small supervised neural network: hashed text features → tanh hidden layer → category softmax.
+// Trained on this catalogue only; not a general language model or live search.
+const CategoryNet=(()=>{
+ const labels=[...new Set(DATA.suppliers.flatMap(s=>s.categories))], D=128,H=16,K=labels.length;
+ let seed=19;const rand=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296-.5;};
+ const W=Array.from({length:H},()=>Float64Array.from({length:D},()=>rand()*.15));
+ const V=Array.from({length:K},()=>Float64Array.from({length:H},()=>rand()*.15));
+ function vector(text){const x=new Float64Array(D);for(const word of text.toLowerCase().match(/[а-яёa-z0-9]+/g)||[]){for(let j=0;j<word.length-1;j++){let h=0;for(const c of word.slice(j,j+3))h=(Math.imul(h,31)+c.charCodeAt(0))>>>0;x[h%D]++;}}const n=Math.hypot(...x)||1;return x.map(v=>v/n);}
+ function forward(x){const h=W.map(w=>Math.tanh(w.reduce((a,b,i)=>a+b*x[i],0)));let z=V.map(w=>w.reduce((a,b,i)=>a+b*h[i],0));const m=Math.max(...z);z=z.map(v=>Math.exp(v-m));const sum=z.reduce((a,b)=>a+b,0);return {h,p:z.map(v=>v/sum)};}
+ const rows=DATA.suppliers.map(s=>({x:vector(s.name+' '+s.description+' '+s.categories.map(c=>CAT[c]?.name||'').join(' ')),ys:s.categories.map(c=>labels.indexOf(c))}));
+ for(let e=0;e<70;e++)for(const r of rows){const {h,p}=forward(r.x);const delta=p.map((v,k)=>v-(r.ys.includes(k)?1/r.ys.length:0));const dh=h.map((v,j)=>delta.reduce((a,d,k)=>a+d*V[k][j],0)*(1-v*v));for(let k=0;k<K;k++)for(let j=0;j<H;j++)V[k][j]-=.12*delta[k]*h[j];for(let j=0;j<H;j++)for(let i=0;i<D;i++)W[j][i]-=.12*dh[j]*r.x[i];}
+ return {scores(text){const {p}=forward(vector(text));return Object.fromEntries(labels.map((v,i)=>[v,p[i]]));}};
+})();
+
+// ── Поиск (повторяет логику src/lib/queries.ts) ──────────────
+const ALL_SORTS = { rating: "Сначала с высоким рейтингом", reviews: "Больше отзывов", name: "По названию", new: "Сначала новые на площадке" };
+// Что есть в каталоге: пока у компаний нет цен, отзывов и проверки, эти фильтры и колонки не показываем
+const HAS = {
+  prices: DATA.suppliers.some((s) => s.products.length > 0),
+  ratings: DATA.suppliers.some((s) => s.reviewsCount > 0),
+  verified: DATA.suppliers.some((s) => s.verified || s.majorNote),
+};
+const SORTS = HAS.ratings ? ALL_SORTS : { name: ALL_SORTS.name, new: ALL_SORTS.new };
+
+function parseFilters(sp) {
+  const num = (k, max) => { const v = parseFloat(sp.get(k)); return Number.isFinite(v) && v >= 0 && (!max || v <= max) ? v : undefined; };
+  const str = (k) => (sp.get(k) || "").trim().slice(0, 100) || undefined;
+  const page = parseInt(sp.get("page"), 10);
+  return {
+    q: str("q"), category: str("category"), region: str("region"),
+    priceMin: num("priceMin"), priceMax: num("priceMax"), ratingMin: num("ratingMin", 5),
+    verified: sp.get("verified") === "1" ? "1" : undefined,
+    sort: SORTS[sp.get("sort")] ? sp.get("sort") : HAS.ratings ? "rating" : "name",
+    page: page >= 1 ? page : 1,
+  };
+}
+const activeCount = (f) => [f.category, f.region, f.priceMin, f.priceMax, f.ratingMin, f.verified].filter((v) => v !== undefined).length;
+
+function priceFrom(s, scope) {
+  const list = s.products.filter((p) => !scope || scope.includes(p.category)).sort((a, b) => a.price - b.price);
+  return list[0] ? { price: list[0].price, unit: list[0].unit, productName: list[0].name } : null;
+}
+
+function search(f) {
+  const scope = catScope(f.category);
+  const q = f.q && f.q.toLowerCase();
+  let items = DATA.suppliers.filter((s) => {
+    if (q) {
+      const hay = [s.name, s.description, ...s.products.map((p) => p.name), ...s.categories.map((c) => CAT[c]?.name || "")].join(" ").toLowerCase();
+      if (!q.split(/\s+/).filter(Boolean).every(word=>hay.includes(word))) return false;
+    }
+    if (f.category && !(scope && s.categories.some((c) => scope.includes(c)))) return false;
+    if (f.region && s.region !== f.region && !s.deliveryRegions.includes(f.region)) return false;
+    if (f.priceMin !== undefined || f.priceMax !== undefined) {
+      const ok = s.products.some((p) =>
+        (f.priceMin === undefined || p.price >= f.priceMin) && (f.priceMax === undefined || p.price <= f.priceMax) && (!scope || scope.includes(p.category)));
+      if (!ok) return false;
+    }
+    if (f.ratingMin !== undefined && s.rating < f.ratingMin) return false;
+    // «Только проверенные»: документы проверены или крупная компания с отметкой «Компания из справочника»
+    if (f.verified && !s.verified && !s.majorNote) return false;
+    return true;
+  });
+  const byName = (a, b) => a.name.localeCompare(b.name, "ru");
+  const sorters = {
+    rating: (a, b) => b.verified - a.verified || !!b.majorNote - !!a.majorNote || b.rating - a.rating || b.reviewsCount - a.reviewsCount || byName(a, b),
+    reviews: (a, b) => b.reviewsCount - a.reviewsCount || b.rating - a.rating || byName(a, b),
+    name: byName,
+    new: (a, b) => b.order - a.order || byName(a, b),
+  };
+  items.sort(sorters[f.sort]);
+  const total = items.length;
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  items = items.slice((f.page - 1) * PAGE_SIZE, f.page * PAGE_SIZE).map((s) => ({ ...s, priceFrom: priceFrom(s, scope) }));
+  return { items, total, page: f.page, pageCount };
+}
+
+// ── Общие кусочки разметки ───────────────────────────────────
+function ratingHtml(value, count, size) {
+  if (!count) return `<span class="text-sm text-muted">Нет отзывов</span>`;
+  const word = plural(count, ["отзыв", "отзыва", "отзывов"]);
+  return `<span class="inline-flex items-baseline gap-1.5" aria-label="Рейтинг ${fmtRating(value)} из 5, ${count} ${word}">
+    <span aria-hidden="true" class="text-signal-dark">★</span>
+    <span class="tabular font-display font-semibold ${size === "lg" ? "text-2xl" : "text-base"}">${fmtRating(value)}</span>
+    <span class="text-sm text-muted">${count} ${word}</span></span>`;
+}
+const publicHtml = () => `<span class="inline-flex items-center rounded-full bg-paper px-2.5 py-1 text-xs font-medium text-muted" title="Карточка составлена по открытым источникам. Компания пока не подтвердила размещение на площадке">Из открытых источников</span>`;
+const verifiedHtml = () => `<span class="inline-flex items-center gap-1 rounded-full bg-ok-tint px-2.5 py-1 text-xs font-bold text-ok-dark" title="Документы компании проверены модератором">
+  <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Документы проверены</span>`;
+/** «Компания из справочника»: крупная, давно работающая компания; в подсказке — почему. Документы площадка не проверяла. */
+const trustedHtml = (note) => `<span class="inline-flex items-center gap-1 rounded-full bg-ok-tint px-2.5 py-1 text-xs font-bold text-ok-dark" title="Крупная компания: ${esc(note)}. Отметка по открытым данным — документы площадка не проверяла">
+  <svg viewBox="0 0 16 16" class="h-3.5 w-3.5 shrink-0" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Компания из справочника</span>`;
+const badgesHtml = (s) => `${s.majorNote ? trustedHtml(s.majorNote) : ""}${s.verified ? verifiedHtml() : ""}${s.isClaimed ? "" : publicHtml()}`;
+
+/** Кнопки «В избранное» и «Сравнить». Состояние выставляет refreshMarks(). */
+function actionsHtml(s) {
+  return `<div class="flex flex-wrap items-center gap-2">
+    <button type="button" class="btn-ghost px-3" data-fav="${esc(s.slug)}" aria-pressed="false">
+      <svg viewBox="0 0 20 20" class="h-4 w-4" aria-hidden="true"><path d="M5 2.5h10a1 1 0 0 1 1 1V18l-6-3.6L4 18V3.5a1 1 0 0 1 1-1z" fill="none" stroke="#111827" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <span>В избранное</span></button>
+    <button type="button" class="btn-ghost px-3" data-cmp="${esc(s.slug)}" data-name="${esc(s.name)}" aria-pressed="false">
+      <span aria-hidden="true" class="cmp-box flex h-4 w-4 items-center justify-center rounded-sm border-2 border-line-strong"></span>Сравнить</button>
+    <p role="status" class="cmp-notice hidden basis-full text-sm text-danger"></p>
+  </div>`;
+}
+
+const GRID = "md:grid-cols-[minmax(0,1fr)_9.5rem_8.5rem_8.5rem]";
+/** Буква-аватар компании: пока у поставщиков нет логотипов */
+function avatarHtml(name, size = "md") {
+  const letter = esc(name.replace(/^[^A-Za-zА-Яа-яЁё0-9]+/, "").charAt(0).toUpperCase());
+  return `<span aria-hidden="true" class="flex shrink-0 items-center justify-center rounded-2xl bg-petrol-tint font-display font-extrabold text-petrol ${size === "lg" ? "h-16 w-16 text-3xl" : "h-12 w-12 text-xl"}">${letter}</span>`;
+}
+// Контурные иконки направлений каталога
+const CAT_ICONS = {
+  metalloprokat: '<path d="M3 7h18M3 12h18M3 17h18"/><circle cx="6" cy="7" r="1"/><circle cx="6" cy="12" r="1"/><circle cx="6" cy="17" r="1"/>',
+  stroymaterialy: '<rect x="3" y="4" width="8" height="5"/><rect x="13" y="4" width="8" height="5"/><rect x="8" y="11" width="8" height="5"/><rect x="3" y="18" width="8" height="3"/><rect x="13" y="18" width="8" height="3"/>',
+  upakovka: '<path d="M3 8l9-4 9 4v8l-9 4-9-4z"/><path d="M3 8l9 4 9-4M12 12v8"/>',
+  "produkty-horeca": '<path d="M5 9h12v6a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5z"/><path d="M17 11h1.5a2.5 2.5 0 0 1 0 5H17M8 3v3M12 3v3"/>',
+  ofis: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',
+  elektrotehnika: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  "specodezhda-siz": '<path d="M4 14a8 8 0 0 1 16 0v2H4z"/><path d="M10 6V4h4v2M2 16h20"/>',
+  logistika: '<path d="M2 6h12v10H2zM14 9h4l4 4v3h-8z"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>',
+};
+const catIcon = (slug) => `<svg viewBox="0 0 24 24" class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CAT_ICONS[slug] || CAT_ICONS.upakovka}</svg>`;
+/** Карточка поставщика для витрины на главной */
+function cardHtml(s) {
+  return `<article class="flex flex-col gap-3 rounded-[20px] border border-line bg-surface p-5 transition-shadow duration-200 hover:shadow-lift">
+    <div class="flex items-center gap-3">${avatarHtml(s.name)}<div class="min-w-0"><h3 class="truncate font-display text-[17px] font-bold"><a href="#/s/${esc(s.slug)}" class="hover:text-petrol">${esc(s.name)}</a></h3><p class="text-sm text-muted">${esc(s.city)}</p></div></div>
+    ${s.majorNote || s.verified ? `<div class="flex flex-wrap gap-1.5">${s.majorNote ? trustedHtml(s.majorNote) : ""}${s.verified ? verifiedHtml() : ""}</div>` : ""}
+    <p class="line-clamp-3 text-sm text-muted">${esc(s.description)}</p>
+    <div class="mt-auto flex gap-2 pt-1"><a href="#/rfq?supplier=${esc(s.slug)}" class="btn-primary flex-1 whitespace-nowrap">Запросить КП</a>
+      <a href="#/s/${esc(s.slug)}" class="btn-ghost w-11 shrink-0 px-0" aria-label="Подробнее о компании ${esc(s.name)}"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+  </article>`;
+}
+
+function rowHtml(s, showNumbers = true) {
+  const cats = leafCats(s).slice(0, 4);
+  return `<li class="relative border-b border-line bg-surface last:border-b-0">
+    <span aria-hidden="true" data-stripe="${esc(s.slug)}" class="absolute inset-y-0 left-0 hidden w-1 bg-petrol"></span>
+    <article class="grid gap-4 px-4 py-5 sm:px-5 ${showNumbers ? GRID : ""} md:gap-6">
+      <div class="flex min-w-0 gap-4"><div class="hidden sm:block">${avatarHtml(s.name)}</div><div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <h3 class="font-display text-lg font-bold leading-snug"><a href="#/s/${esc(s.slug)}" class="hover:text-petrol hover:underline">${esc(s.name)}</a></h3>
+          ${badgesHtml(s)}
+        </div>
+        <p class="mt-0.5 text-sm text-muted">${place(s)}</p>
+        <p class="mt-2 line-clamp-2 max-w-[68ch] text-sm">${esc(s.description)}</p>
+        ${cats.length ? `<ul class="mt-2 flex flex-wrap gap-1.5" aria-label="Категории">${cats.map((c) =>
+          `<li><a href="#/search?category=${c.slug}" class="rounded-full bg-paper px-2.5 py-1 text-xs font-medium text-ink transition-colors hover:bg-petrol-tint hover:text-petrol">${esc(c.name)}</a></li>`).join("")}</ul>` : ""}
+      </div></div>
+      ${showNumbers ? `<dl class="grid grid-cols-3 gap-3 border-t border-line pt-3 text-sm md:contents md:border-0 md:pt-0">
+        <div><dt class="text-xs text-muted md:sr-only">Цена от</dt>
+          <dd class="tabular font-semibold">${s.priceFrom ? `${rub(s.priceFrom.price)}<span class="font-normal text-muted"> / ${esc(s.priceFrom.unit)}</span>` : `<span class="font-normal text-muted">по запросу</span>`}</dd>
+          ${s.priceFrom ? `<dd class="mt-0.5 hidden text-xs text-muted md:block">${esc(s.priceFrom.productName)}</dd>` : ""}</div>
+        <div><dt class="text-xs text-muted md:sr-only">Мин. заказ</dt><dd class="tabular">${s.minOrderRub ? `от ${rub(s.minOrderRub)}` : `<span class="text-muted">${s.isClaimed ? "нет" : "не указан"}</span>`}</dd></div>
+        <div><dt class="text-xs text-muted md:sr-only">Рейтинг</dt><dd>${ratingHtml(s.rating, s.reviewsCount)}</dd></div>
+      </dl>` : ""}
+      <div class="flex flex-wrap items-center gap-2 sm:pl-16 ${showNumbers ? "md:col-start-1 md:-mt-2" : ""}">
+        <a href="#/rfq?supplier=${esc(s.slug)}" class="btn-primary">Запросить КП</a>
+        ${actionsHtml(s)}
+      </div>
+    </article>
+  </li>`;
+}
+function listHtml(items) {
+  const showNumbers = items.some((s) => s.priceFrom || s.minOrderRub || s.reviewsCount > 0);
+  return `<div class="overflow-hidden rounded-2xl border border-line bg-surface">
+    ${showNumbers ? `<div aria-hidden="true" class="hidden border-b border-line-strong bg-paper/60 px-5 py-2 text-xs font-medium text-muted md:grid ${GRID} md:gap-6">
+      <span>Поставщик</span><span>Цена от</span><span>Мин. заказ</span><span>Рейтинг</span></div>` : ""}
+    <ul>${items.map((s) => rowHtml(s, showNumbers)).join("")}</ul></div>`;
+}
+function categoryOptions(selected, allLabel) {
+  return DATA.categories.map((c) => `<optgroup label="${esc(c.name)}">
+    <option value="${c.slug}" ${selected === c.slug ? "selected" : ""}>${esc(c.name)}: ${allLabel}</option>
+    ${c.children.map((ch) => `<option value="${ch.slug}" ${selected === ch.slug ? "selected" : ""}>${esc(ch.name)}</option>`).join("")}
+  </optgroup>`).join("");
+}
+const regionOptions = (selected) => REGIONS.map((r) => `<option ${selected === r ? "selected" : ""}>${esc(r)}</option>`).join("");
+
+// ── Страницы ────────────────────────────────────────────────
+function pageHome() {
+  // Лучшие — подтвердившие размещение и с отзывами; если таких нет — проверенные, по одному на направление
+  const rated = search({ sort: "rating", page: 1 }).items.filter((s) => s.isClaimed && s.reviewsCount > 0).slice(0, 4);
+  const seen = new Set();
+  const trusted = rated.length ? [] : DATA.suppliers.filter((s) => s.majorNote).sort((a, b) => a.name.localeCompare(b.name, "ru"))
+    .filter((s) => { const k = leafCats(s)[0]?.slug || s.slug; if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 4);
+  const top = rated.length ? rated : trusted.length ? trusted : search({ sort: "name", page: 1 }).items.slice(0, 4);
+  const regions = REGIONS.length, n = DATA.suppliers.length;
+  const trustedCount = DATA.suppliers.filter((s) => s.majorNote || s.verified).length;
+  const counts = (slug) => DATA.suppliers.filter((s) => s.categories.includes(slug)).length;
+  const popular = ["Арматура", "Гофрокороб", "Газобетон", "Спецодежда", "Кабель", "Грузоперевозки"];
+  const payN = Object.keys(PAYMENT).length;
+  const tiles = [[n, plural(n, ["компания", "компании", "компаний"])], [trustedCount, plural(trustedCount, ["проверенный", "проверенных", "проверенных"])],
+    [CARRIERS.length, plural(CARRIERS.length, ["перевозчик", "перевозчика", "перевозчиков"])], [payN, plural(payN, ["способ оплаты", "способа оплаты", "способов оплаты"])]];
+  // Пример расчёта — тем же кодом, что в форме запроса
+  const exGoods = Prices.estimateGoods("Арматура", "10 т");
+  const exTrip = Delivery.estimateDelivery("Москва", "Казань", "ftl");
+  const exCost = exTrip ? Delivery.estimateCost({ roadKm: exTrip.roadKm, mode: "ftl", weightKg: 10000, carrierSlug: null }) : null;
+  const h2 = "text-2xl sm:text-[1.75rem]";
+  const more = "shrink-0 text-sm font-bold text-petrol hover:text-petrol-dark";
+  return `
+  <section class="page pt-6">
+    <div class="flex flex-wrap items-center justify-between gap-8 rounded-[24px] bg-petrol-tint px-6 py-10 sm:px-10 sm:py-12">
+      <div class="min-w-0 flex-[1_1_28rem]">
+        <h1 class="text-[2rem] leading-[1.08] sm:text-5xl">Поставщики для бизнеса в одном поиске</h1>
+        <p class="mt-4 max-w-xl text-base text-muted sm:text-lg">${n} ${plural(n, ["компания", "компании", "компаний"])} из ${regions} ${plural(regions, ["региона", "регионов", "регионов"])}. Узнайте срок и стоимость доставки до вашего города и отправьте всем один запрос КП.</p>
+        <div class="mt-5 flex flex-wrap gap-2" aria-label="Часто ищут">${popular.map((q) => `<a href="#/search?q=${encodeURIComponent(q)}" class="rounded-full bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition-colors duration-200 hover:text-petrol">${q}</a>`).join("")}</div>
+      </div>
+      <dl class="grid flex-[0_1_22rem] grid-cols-2 gap-3">${tiles.map(([v, l]) => `<div class="flex flex-col-reverse gap-1 rounded-[18px] bg-surface p-5"><dt class="text-sm text-muted">${l}</dt><dd class="tabular font-display text-[2rem] font-extrabold leading-none text-petrol">${v}</dd></div>`).join("")}</dl>
+    </div>
+  </section>
+  <section class="page pt-14" aria-labelledby="cat-title">
+    <div class="flex items-baseline justify-between gap-4"><h2 id="cat-title" class="${h2}">Категории</h2><a href="#/search" class="${more}">Все поставщики</a></div>
+    <ul class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">${DATA.categories.map((c) => `<li><a href="#/search?category=${c.slug}" class="group flex h-full items-center gap-4 rounded-[18px] bg-paper p-4 transition-colors duration-200 hover:bg-petrol-tint">
+      <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-[14px] bg-surface text-petrol">${catIcon(c.slug)}</span>
+      <span class="min-w-0"><span class="block font-bold group-hover:text-petrol">${esc(c.name)}</span><span class="block text-sm text-muted">${counts(c.slug)} ${plural(counts(c.slug), ["компания", "компании", "компаний"])}</span></span></a></li>`).join("")}</ul>
+  </section>
+  <section class="page pt-14" aria-labelledby="top-title">
+    <div class="flex items-baseline justify-between gap-4"><h2 id="top-title" class="${h2}">${rated.length ? "Компании из справочника с высоким рейтингом" : trusted.length ? "Компании из справочника" : "Поставщики в каталоге"}</h2>
+      <a ${hrefAttr(trusted.length ? "#/search?verified=1" : "#/search")} class="${more}">${trusted.length ? `Все ${trustedCount}` : "Все поставщики"}</a></div>
+    <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">${top.map(cardHtml).join("")}</div>
+  </section>
+  <section class="page pt-14" aria-labelledby="ahead-title">
+    <h2 id="ahead-title" class="${h2}">Всё видно до ответа поставщика</h2>
+    <div class="mt-5 grid gap-4 md:grid-cols-3">
+      <div class="flex flex-col gap-2.5 rounded-[20px] bg-paper p-6"><p class="text-sm font-bold text-petrol">Примерная стоимость</p>${exGoods.ok ? `<p class="tabular font-display text-2xl font-extrabold">${Prices.moneyRange(exGoods.low, exGoods.high)}</p>` : ""}<p class="text-sm text-muted">Например, 10 т арматуры — по средним рыночным ценам (${Prices.PRICES_AS_OF}). Считается прямо в форме запроса.</p></div>
+      <div class="flex flex-col gap-2.5 rounded-[20px] bg-paper p-6"><p class="text-sm font-bold text-petrol">Доставка до вашего города</p>${exCost && exCost.ok ? `<p class="tabular font-display text-2xl font-extrabold">${Delivery.costRange(exCost.low, exCost.high)}</p>` : ""}<p class="text-sm text-muted">Москва → Казань отдельной машиной${exTrip ? `, ${Delivery.dayRange(exTrip.minDays, exTrip.maxDays)} в пути` : ""}. ${CARRIERS.length} ${plural(CARRIERS.length, ["перевозчик", "перевозчика", "перевозчиков"])} на выбор.</p></div>
+      <div class="flex flex-col gap-2.5 rounded-[20px] bg-paper p-6"><p class="text-sm font-bold text-petrol">Удобная оплата</p><ul class="flex flex-wrap gap-2">${Object.entries(PAYMENT).map(([k, m]) => `<li class="rounded-full bg-surface px-3.5 py-2 text-sm font-bold">${k === "bank" ? "Перевод на счёт" : m.label}</li>`).join("")}</ul><p class="text-sm text-muted">Отметьте в запросе — поставщик учтёт это в предложении.</p></div>
+    </div>
+  </section>
+  <section class="page pt-14" aria-labelledby="how-title">
+    <div class="flex flex-wrap items-center justify-between gap-8 rounded-[24px] bg-ink px-6 py-10 text-white sm:px-10">
+      <div class="min-w-0 flex-[1_1_36rem]"><h2 id="how-title" class="text-2xl text-white">Как получить предложение</h2>
+        <ol class="mt-6 grid gap-6 sm:grid-cols-3">${[["Найдите", "По товару, категории или региону."], ["Сравните", "До четырёх поставщиков в одной таблице."], ["Запросите КП", "Один запрос — всем сразу, ответы в одной таблице."]]
+          .map(([t, d], i) => `<li class="flex flex-col gap-1.5"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-petrol font-extrabold">${i + 1}</span><h3 class="mt-1 text-lg font-bold text-white">${t}</h3><p class="text-sm text-white/75">${d}</p></li>`).join("")}</ol></div>
+      <a href="#/search" class="btn bg-surface px-6 py-4 text-base font-extrabold text-ink hover:bg-petrol-tint">Начать поиск</a>
+    </div>
+  </section>
+  <section class="page pt-14">
+    <div class="flex flex-col gap-4 rounded-[24px] border border-line p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+      <div><h2 class="text-xl">Вы поставщик?</h2><p class="mt-1 max-w-xl text-sm text-muted">Разместите компанию и каталог бесплатно. Запросы от закупщиков будут приходить вам на почту.</p></div>
+      <a href="#/for-suppliers" class="btn-primary shrink-0">Разместить компанию</a>
+    </div>
+  </section>`;
+}
+
+function toParams(f, except = []) {
+  const out = new URLSearchParams();
+  for (const [k, v] of Object.entries(f)) {
+    if (v === undefined || except.includes(k) || k === "page") continue;
+    if (k === "sort" && v === "rating") continue;
+    out.set(k, String(v));
+  }
+  return out;
+}
+const hidden = (f, except) => [...toParams(f, except)].map(([k, v]) => `<input type="hidden" name="${esc(k)}" value="${esc(v)}">`).join("");
+
+function pageSearch(sp) {
+  const f = parseFilters(sp);
+  const r = search(f);
+  const catName = f.category && CAT[f.category] ? CAT[f.category].name : null;
+  const ac = activeCount(f);
+  const params = toParams(f);
+  const pageHref = (p) => { const x = new URLSearchParams(params); if (p > 1) x.set("page", p); return `#/search?${x}`; };
+  const pages = [...new Set([1, r.page - 1, r.page, r.page + 1, r.pageCount])].filter((p) => p >= 1 && p <= r.pageCount).sort((a, b) => a - b);
+
+  return `<div class="page py-6 sm:py-8">
+    <form data-hixo="off" data-route="/search" class="flex gap-2" role="search">
+      <label for="q" class="sr-only">Товар, услуга или компания</label>
+      <input id="q" name="q" type="search" value="${esc(f.q)}" placeholder="Товар, услуга или компания" class="field min-h-12 text-lg">
+      ${hidden(f, ["q"])}
+      <button class="btn-primary min-h-12 px-5">Найти</button>
+    </form>
+    <div class="mt-6 grid gap-6 lg:grid-cols-[17rem_minmax(0,1fr)]">
+      <aside aria-label="Фильтры">
+        <button type="button" id="filters-toggle" aria-expanded="false" aria-controls="filters" class="btn-ghost w-full justify-between lg:hidden">
+          <span>Фильтры${ac ? `<span class="tabular ml-1.5 rounded-full bg-signal px-1.5 text-xs">${ac}</span>` : ""}</span><span aria-hidden="true">Показать</span></button>
+        <div id="filters" class="hidden lg:mt-0 lg:block">
+          <form data-hixo="off" data-route="/search" class="space-y-5 rounded-2xl border border-line bg-surface p-4">
+            ${f.q ? `<input type="hidden" name="q" value="${esc(f.q)}">` : ""}<input type="hidden" name="sort" value="${f.sort}">
+            <div><label for="category" class="label">Категория</label>
+              <select id="category" name="category" class="field"><option value="">Все категории</option>${categoryOptions(f.category, "все")}</select></div>
+            <div><label for="region" class="label">Регион</label>
+              <select id="region" name="region" class="field"><option value="">Вся Россия</option>${regionOptions(f.region)}</select>
+              <p class="mt-1 text-xs text-muted">Поставщик находится здесь или доставляет сюда</p></div>
+            ${HAS.prices ? `<fieldset><legend class="label">Цена за единицу, ₽</legend>
+              <div class="grid grid-cols-2 gap-2">
+                <label><span class="sr-only">Цена от</span><input name="priceMin" type="number" min="0" step="any" inputmode="decimal" value="${f.priceMin ?? ""}" placeholder="от" class="field tabular"></label>
+                <label><span class="sr-only">Цена до</span><input name="priceMax" type="number" min="0" step="any" inputmode="decimal" value="${f.priceMax ?? ""}" placeholder="до" class="field tabular"></label>
+              </div></fieldset>` : ""}
+            ${HAS.ratings ? `<fieldset><legend class="label">Рейтинг</legend><div class="space-y-1.5 text-sm">
+              ${[["", "Любой"], ["4", "4 и выше"], ["4.5", "4,5 и выше"]].map(([v, l]) =>
+                `<label class="flex min-h-8 items-center gap-2"><input type="radio" name="ratingMin" value="${v}" ${String(f.ratingMin ?? "") === v ? "checked" : ""} class="h-4 w-4 accent-petrol">${l}</label>`).join("")}
+            </div></fieldset>` : ""}
+            ${HAS.verified ? `<label class="flex min-h-8 items-center gap-2 text-sm"><input type="checkbox" name="verified" value="1" ${f.verified ? "checked" : ""} class="h-4 w-4 accent-petrol">Только проверенные поставщики</label>` : ""}
+            <div class="flex gap-2 pt-1"><button class="btn-primary flex-1">Показать</button>
+              ${ac ? `<a href="#/search${f.q ? `?q=${encodeURIComponent(f.q)}` : ""}" class="btn-ghost">Сбросить</a>` : ""}</div>
+          </form>
+        </div>
+      </aside>
+      <section aria-labelledby="results-title" class="min-w-0">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 id="results-title" class="text-xl font-semibold sm:text-2xl">${f.q ? `«${esc(f.q)}»` : esc(catName ?? "Все поставщики")}</h1>
+            <p class="mt-1 text-sm text-muted">Найдено ${r.total} ${plural(r.total, ["поставщик", "поставщика", "поставщиков"])}${f.q && catName ? ` в категории «${esc(catName)}»` : ""}${f.region ? `, регион: ${esc(f.region)}` : ""}</p>
+          </div>
+          <form data-hixo="off" data-route="/search">${hidden(f, ["sort"])}
+            <label class="flex items-center gap-2 text-sm"><span class="text-muted">Сортировка</span>
+              <select name="sort" data-autosubmit class="field w-auto py-2 text-sm">${Object.entries(SORTS).map(([k, l]) => `<option value="${k}" ${f.sort === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+          </form>
+        </div>
+        <div class="mt-4">${r.items.length ? listHtml(r.items) : `
+          <div class="rounded-2xl border border-dashed border-line-strong bg-surface p-6">
+            <h2 class="text-lg font-semibold">Под эти условия поставщиков нет</h2>
+            <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+              ${ac ? "<li>Уберите часть фильтров — чаще всего мешают регион и диапазон цен.</li>" : ""}
+              ${f.q ? "<li>Попробуйте запрос короче, например одно слово: «арматура» вместо «арматура А500С 12 мм».</li>" : ""}
+              <li>Или отправьте запрос на площадку — мы сами найдём поставщика и передадим ему задачу.</li>
+            </ul>
+            <div class="mt-4 flex flex-wrap gap-2"><a href="#/rfq${f.category ? `?category=${f.category}` : ""}" class="btn-primary">Отправить общий запрос</a><a href="#/search" class="btn-ghost">Сбросить поиск</a></div>
+          </div>`}</div>
+        ${r.pageCount > 1 ? `<nav aria-label="Страницы результатов" class="mt-6 flex flex-wrap items-center gap-1.5">
+          ${r.page > 1 ? `<a ${hrefAttr(pageHref(r.page - 1))} class="btn-ghost">Назад</a>` : ""}
+          ${pages.map((p, i) => `${i > 0 && p - pages[i - 1] > 1 ? '<span class="px-1 text-muted">…</span>' : ""}${p === r.page
+            ? `<span aria-current="page" class="btn tabular min-w-11 bg-ink text-white">${p}</span>`
+            : `<a ${hrefAttr(pageHref(p))} class="btn-ghost tabular min-w-11">${p}</a>`}`).join("")}
+          ${r.page < r.pageCount ? `<a ${hrefAttr(pageHref(r.page + 1))} class="btn-ghost">Дальше</a>` : ""}
+        </nav>` : ""}
+      </section>
+    </div>
+  </div>`;
+}
+
+function pageSupplier(slug) {
+  const s = bySlug(slug);
+  if (!s) return pageNotFound();
+  const cats = leafCats(s);
+  const facts = [["Минимальный заказ", s.minOrderRub ? `от ${rub(s.minOrderRub)}` : s.isClaimed ? "Нет" : null], ["Оплата", s.paymentTerms], ["Доставка", s.deliveryTerms],
+    ["Год основания", s.foundedYear], ["Сотрудников", s.employees], ["Регионы доставки", s.deliveryRegions.join(", ")]].filter(([, v]) => v);
+  return `<div class="pb-24 lg:pb-0">
+    <section class="relative border-b border-line bg-surface">
+      <span aria-hidden="true" data-stripe="${esc(s.slug)}" class="absolute inset-y-0 left-0 hidden w-1 bg-petrol"></span>
+      <div class="page py-6 sm:py-8">
+        <nav aria-label="Навигационная цепочка" class="text-sm text-muted"><a href="#/search" class="hover:text-petrol hover:underline">Поставщики</a>${cats[0] ? ` / <a href="#/search?category=${cats[0].slug}" class="hover:text-petrol hover:underline">${esc(cats[0].name)}</a>` : ""}</nav>
+        <div class="mt-3 flex flex-wrap items-start justify-between gap-6">
+          <div class="min-w-0 max-w-3xl">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">${avatarHtml(s.name, "lg")}<h1 class="text-3xl leading-tight sm:text-4xl">${esc(s.name)}</h1>${badgesHtml(s)}</div>
+            <p class="mt-1 text-muted">${s.legalName ? `${esc(s.legalName)}, ` : ""}${place(s)}</p>
+            ${s.majorNote ? `<p class="mt-2 text-sm"><span class="font-semibold text-ok">Компания из справочника:</span> ${esc(s.majorNote)}. <span class="text-muted">Отметка по открытым данным о компании, документы площадка не проверяла.</span></p>` : ""}
+            ${s.isClaimed ? `<div class="mt-3">${ratingHtml(s.rating, s.reviewsCount, "lg")}</div>` : ""}
+          </div>
+          <div class="flex flex-col items-start gap-2 lg:items-end">
+            <a href="#/rfq?supplier=${esc(s.slug)}" class="btn-primary hidden px-6 text-base lg:inline-flex">Запросить КП</a>
+            ${actionsHtml(s)}
+          </div>
+        </div>
+        ${s.isClaimed ? "" : `<div class="mt-5 max-w-3xl rounded-xl border border-line-strong bg-paper p-3 text-sm">
+          <p>Карточка составлена по открытым источникам, компания пока не подтвердила размещение. Цен, отзывов и условий здесь нет: уточняйте их на сайте компании или отправьте запрос КП — менеджер площадки передаст его в отдел продаж.</p>
+          <p class="mt-1.5 text-muted">${s.sourceUrl ? `<a ${hrefAttr(s.sourceUrl)} class="link" rel="nofollow noopener" target="_blank">Источник данных</a>. ` : ""}Это ваша компания? <a href="#/for-suppliers" class="link">Подтвердите карточку или попросите её удалить</a>.</p>
+        </div>`}
+      </div>
+    </section>
+    <div class="page mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div class="min-w-0 space-y-10">
+        <section aria-labelledby="about"><h2 id="about" class="text-xl font-semibold">О компании</h2>
+          <p class="mt-3 max-w-[70ch]">${esc(s.description)}</p>
+          <ul class="mt-4 flex flex-wrap gap-1.5" aria-label="Категории">${cats.map((c) => `<li><a href="#/search?category=${c.slug}" class="rounded-full border border-line bg-surface px-2 py-1 text-sm hover:border-ink">${esc(c.name)}</a></li>`).join("")}</ul>
+        </section>
+        <section aria-labelledby="catalog"><h2 id="catalog" class="text-xl font-semibold">Каталог и цены</h2>
+          ${s.products.length ? `<p class="mt-1 text-sm text-muted">${s.products.length} ${plural(s.products.length, ["позиция", "позиции", "позиций"])}. Цены без НДС, точную стоимость с доставкой уточняйте в запросе КП.</p>
+          <div class="mt-4 overflow-hidden rounded-2xl border border-line bg-surface"><table class="w-full text-sm">
+            <thead class="hidden bg-paper/60 text-left text-xs text-muted sm:table-header-group"><tr>
+              <th scope="col" class="px-4 py-2 font-medium">Товар или услуга</th><th scope="col" class="px-4 py-2 text-right font-medium">Цена</th>
+              <th scope="col" class="px-4 py-2 text-right font-medium">Мин. партия</th><th scope="col" class="px-4 py-2 font-medium">Наличие</th></tr></thead>
+            <tbody>${s.products.map((p) => `<tr class="grid grid-cols-2 gap-x-4 gap-y-1 border-t border-line px-4 py-3 first:border-t-0 sm:table-row sm:p-0">
+              <td class="col-span-2 font-medium sm:px-4 sm:py-3">${esc(p.name)}${p.category ? `<span class="block text-xs font-normal text-muted">${esc(CAT[p.category]?.name)}</span>` : ""}</td>
+              <td class="tabular font-semibold sm:px-4 sm:py-3 sm:text-right">${rub(p.price)} <span class="font-normal text-muted">/ ${esc(p.unit)}</span></td>
+              <td class="tabular text-right text-muted sm:px-4 sm:py-3 sm:text-ink">${p.minOrderQty ? `от ${p.minOrderQty} ${esc(p.unit)}` : "—"}</td>
+              <td class="col-span-2 sm:px-4 sm:py-3">${p.inStock ? '<span class="text-ok">В наличии</span>' : '<span class="text-muted">Под заказ</span>'}</td></tr>`).join("")}</tbody>
+          </table></div>` : `<p class="mt-4 rounded-2xl border border-dashed border-line-strong bg-surface p-4 text-sm">${s.isClaimed ? "Поставщик ещё не загрузил каталог. Отправьте запрос КП — он пришлёт цены на почту." : "Каталога на площадке нет. Ассортимент и цены смотрите на сайте компании или запросите КП."}</p>`}
+        </section>
+        <section aria-labelledby="reviews"><h2 id="reviews" class="text-xl font-semibold">Отзывы закупщиков</h2>
+          ${!s.isClaimed ? `<p class="mt-3 text-sm text-muted">Отзывы появятся, когда компания подтвердит размещение и закупщики начнут с ней работать через площадку.</p>` : s.reviews.length ? `<ul class="mt-4 divide-y divide-line rounded-2xl border border-line bg-surface">${s.reviews.map((r) => `<li class="p-4">
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+              <p class="font-semibold">${esc(r.author)}${r.company ? `<span class="font-normal text-muted">, ${esc(r.company)}</span>` : ""}</p>
+              <p class="text-sm"><span aria-label="Оценка ${r.rating} из 5" class="tabular font-semibold"><span aria-hidden="true" class="text-signal-dark">★ </span>${r.rating}</span><span class="ml-2 text-muted">${fmtDate(r.date)}</span></p>
+            </div><p class="mt-1.5 max-w-[70ch] text-sm">${esc(r.text)}</p></li>`).join("")}</ul>`
+            : `<p class="mt-3 text-sm text-muted">Отзывов пока нет. Компания недавно на площадке — запросите КП и сравните условия с другими поставщиками.</p>`}
+        </section>
+      </div>
+      <aside class="space-y-6 lg:sticky lg:top-4 lg:self-start">
+        ${facts.length ? `<section class="rounded-2xl border border-line bg-surface p-4"><h2 class="font-sans text-base font-semibold">Условия работы</h2>
+          <dl class="mt-3 space-y-3 text-sm">${facts.map(([k, v]) => `<div><dt class="text-muted">${k}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl></section>` : ""}
+        <section class="rounded-2xl border border-line bg-surface p-4"><h2 class="font-sans text-base font-semibold">Контакты</h2>
+          <dl class="mt-3 space-y-3 text-sm">
+            ${s.phone ? `<div><dt class="text-muted">Телефон</dt><dd><a href="tel:${esc(s.phone.replace(/[^\d+]/g, ""))}" class="link">${esc(s.phone)}</a></dd></div>` : ""}
+            ${s.email ? `<div><dt class="text-muted">Почта отдела продаж</dt><dd><a href="mailto:${esc(s.email)}" class="link break-all">${esc(s.email)}</a></dd></div>` : ""}
+            ${s.inn ? `<div><dt class="text-muted">ИНН</dt><dd class="tabular">${esc(s.inn)}</dd></div>` : ""}
+            ${s.website ? `<div><dt class="text-muted">Сайт</dt><dd><a ${hrefAttr(s.website)} class="link break-all" rel="nofollow noopener" target="_blank">${esc(s.website.replace(/^https?:\/\//, ""))}</a></dd></div>` : ""}
+          </dl></section>
+      </aside>
+    </div>
+    <div class="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface p-3 lg:hidden">
+      <a href="#/rfq?supplier=${esc(s.slug)}" class="btn-primary w-full text-base">Запросить КП у «${esc(s.name)}»</a>
+    </div>
+  </div>`;
+}
+
+function field(name, label, control, { required, hint } = {}) {
+  return `<div><label for="${name}" class="label">${label}${required ? '<span class="text-danger"> *</span>' : ""}</label>${control}
+    ${hint ? `<p id="${name}-hint" class="mt-1 text-xs text-muted">${hint}</p>` : ""}<p id="${name}-error" class="field-error mt-1 hidden text-sm text-danger"></p></div>`;
+}
+function pageRfq(sp) {
+  // ?supplier=slug — одному поставщику, ?suppliers=a,b,c — нескольким, без параметров — на площадку
+  const targets = (sp.get("suppliers") || sp.get("supplier") || "").split(",").map((x) => x.trim()).filter(Boolean)
+    .slice(0, RFQ_MAX_SUPPLIERS).map(bySlug).filter(Boolean);
+  const s = targets.length === 1 ? targets[0] : null;
+  const n = targets.length;
+  // Категория по умолчанию — только та, в которой работают все выбранные поставщики
+  const common = n ? leafCats(targets[0]).find((c) => targets.every((t) => t.categories.includes(c.slug))) : null;
+  const cat = sp.get("category") || common?.slug || "";
+  const unclaimed = targets.filter((t) => !t.isClaimed).length;
+  const inp = (name, attrs = "") => `<input id="${name}" name="${name}" ${attrs} class="field">`;
+  const toWhom = (k) => `${k} ${plural(k, ["поставщику", "поставщикам", "поставщикам"])}`;
+  const lead = !n ? "Не нашли подходящего поставщика? Опишите задачу — менеджер площадки подберёт поставщиков и перешлёт им запрос."
+    : s && !s.isClaimed ? "Компания пока не подключена к площадке. Менеджер передаст запрос в её отдел продаж и сообщит вам ответ на почту."
+    : s ? "Запрос уйдёт поставщику, ответ придёт на вашу почту. Чем точнее объём, сроки и требования, тем точнее будет цена."
+    : `Один запрос уйдёт всем выбранным поставщикам, их предложения соберутся в одну таблицу.${unclaimed ? ` ${unclaimed} из ${n} пока не подключены к площадке — им запрос передаст менеджер.` : ""}`;
+  return `<div class="page max-w-3xl py-8">
+    <nav aria-label="Навигационная цепочка" class="text-sm text-muted">${s ? `<a href="#/s/${s.slug}" class="hover:text-petrol hover:underline">${esc(s.name)}</a>` : n > 1 ? '<a href="#/compare" class="hover:text-petrol hover:underline">Сравнение поставщиков</a>' : '<a href="#/search" class="hover:text-petrol hover:underline">Поиск поставщиков</a>'}</nav>
+    <h1 class="mt-2 text-2xl font-semibold sm:text-3xl">${s ? `Запрос КП: ${esc(s.name)}` : n > 1 ? `Запрос КП ${toWhom(n)}` : "Запрос КП на площадку"}</h1>
+    <p class="mt-2 max-w-[65ch] text-muted">${lead}</p>
+    ${n > 1 ? `<ul class="mt-4 flex flex-wrap gap-1.5" aria-label="Кому уйдёт запрос">${targets.map((t) => `<li class="rounded-full border border-line-strong bg-surface px-2 py-1 text-sm">${esc(t.name)}${t.isClaimed ? "" : '<span class="text-muted"> · через менеджера</span>'}</li>`).join("")}</ul>` : ""}
+    <div id="rfq-box" class="mt-6">
+    <form data-hixo="off" data-rfq novalidate class="space-y-8">
+      ${n ? `<input type="hidden" name="supplierSlugs" value="${esc(targets.map((t) => t.slug).join(","))}">` : ""}
+      <div class="hidden" aria-hidden="true"><label>Сайт<input name="website" tabindex="-1" autocomplete="off"></label></div>
+      <p role="alert" id="rfq-alert" class="hidden rounded-xl border border-danger/40 bg-danger/5 p-3 text-sm text-danger"></p>
+      <fieldset class="space-y-4"><legend class="font-display text-lg font-semibold">Что нужно</legend>
+        ${field("title", "Товар или услуга", inp("title", 'maxlength="200" placeholder="Например, арматура А500С 12 мм"'), { required: true })}
+        <div class="grid gap-4 sm:grid-cols-2">
+          ${field("quantity", "Объём", inp("quantity", 'maxlength="100"'), { hint: "С единицами: 20 т, 500 шт" })}
+          ${field("categorySlug", "Категория", `<select id="categorySlug" name="categorySlug" class="field"><option value="">Не выбрана</option>${categoryOptions(cat, "другое")}</select>`)}
+          ${field("deadline", "Нужно к дате", inp("deadline", 'type="date"'))}
+          ${field("budget", "Бюджет", inp("budget", 'maxlength="100" placeholder="До 1 200 000 ₽"'), { hint: "Необязательно" })}
+        </div>
+        <div id="order-cost" class="rounded-xl border border-line-strong bg-signal-tint/40 p-4 text-sm" aria-live="polite"></div>
+        ${field("message", "Подробности", '<textarea id="message" name="message" maxlength="5000" rows="5" class="field"></textarea>', { required: true, hint: "Требования к товару, ГОСТ, условия оплаты и доставки" })}
+      </fieldset>
+      <fieldset class="space-y-4" data-delivery="${esc(targets.map((t) => t.slug).join(","))}"><legend class="font-display text-lg font-semibold">Доставка</legend>
+        <div class="grid gap-4 sm:grid-cols-2">
+          ${field("deliveryRegion", "Город доставки", inp("deliveryRegion", 'list="cities" maxlength="100" placeholder="Например, Казань" autocomplete="address-level2"'), { hint: "Город, куда везти заказ" })}
+          ${field("cargoWeight", "Вес груза, кг", inp("cargoWeight", 'inputmode="decimal" placeholder="Например, 500"'), { hint: "Нужен, чтобы оценить стоимость доставки" })}
+          <datalist id="cities">${Delivery.CITY_NAMES.map((c) => `<option value="${esc(c)}">`).join("")}</datalist>
+          ${field("delivery", "Кто доставит", `<select id="delivery" name="delivery" class="field"><option value="">Решу позже</option>
+            <optgroup label="Перевозчики из каталога">${CARRIERS.map((c) => `<option value="carrier:${c.slug}">${esc(c.name)} — ${Delivery.MODE_LABEL[Delivery.carrierMode(c.slug)]}</option>`).join("")}</optgroup>
+            <optgroup label="Другое"><option value="supplier">Доставка силами поставщика</option><option value="pickup">Самовывоз со склада поставщика</option></optgroup></select>`)}
+        </div>
+        <div id="delivery-estimate" class="rounded-xl border border-line-strong bg-paper p-4 text-sm" aria-live="polite"></div>
+      </fieldset>
+      <fieldset aria-describedby="payment-hint"><legend class="font-display text-lg font-semibold">Оплата</legend>
+        <p id="payment-hint" class="mt-1 text-sm text-muted">Как вам удобно платить — можно выбрать несколько. Поставщик учтёт это в предложении. Оплата идёт напрямую поставщику.</p>
+        <div class="mt-3 grid gap-2 sm:grid-cols-3">${Object.entries(PAYMENT).map(([key, m]) => `<label class="flex cursor-pointer items-start gap-2.5 rounded-xl border border-line-strong bg-surface p-3 text-sm transition-colors duration-200 hover:border-ink has-[:checked]:border-petrol has-[:checked]:bg-petrol-tint">
+          <input type="checkbox" name="paymentMethods" value="${key}" class="mt-0.5 h-4 w-4 shrink-0 accent-petrol"><span><span class="block font-semibold">${m.label}</span><span class="mt-0.5 block text-xs text-muted">${m.hint}</span></span></label>`).join("")}</div>
+        <p id="paymentMethods-error" class="field-error mt-1 hidden text-sm text-danger"></p>
+      </fieldset>
+      <fieldset class="space-y-4"><legend class="font-display text-lg font-semibold">Ваши контакты</legend>
+        <div class="grid gap-4 sm:grid-cols-2">
+          ${field("companyName", "Компания", inp("companyName", 'autocomplete="organization"'), { required: true })}
+          ${field("inn", "ИНН", inp("inn", 'inputmode="numeric" maxlength="12"'), { hint: "Поставщики охотнее отвечают компаниям с ИНН" })}
+          ${field("contactName", "Контактное лицо", inp("contactName", 'autocomplete="name"'), { required: true })}
+          ${field("email", "Почта для ответа", inp("email", 'type="email" autocomplete="email"'), { required: true })}
+          ${field("phone", "Телефон", inp("phone", 'type="tel" autocomplete="tel" placeholder="+7"'))}
+        </div>
+      </fieldset>
+      <div><label class="flex items-start gap-2 text-sm"><input type="checkbox" name="consent" id="consent" class="mt-0.5 h-4 w-4 accent-petrol">
+        <span>Согласен на передачу контактов поставщику и <a href="#/privacy" class="link">обработку персональных данных</a></span></label>
+        <p id="consent-error" class="field-error mt-1 hidden text-sm text-danger"></p></div>
+      <button type="submit" class="btn-primary w-full px-8 text-base sm:w-auto">${n > 1 ? `Отправить запрос ${toWhom(n)}` : "Отправить запрос"}</button>
+    </form></div>
+  </div>`;
+}
+
+// Способы оплаты, которые закупщик отмечает в запросе КП (как src/lib/payment.ts)
+const PAYMENT = {
+  cash: { label: "Наличные", short: "наличные", hint: "При получении или в кассе поставщика" },
+  sbp: { label: "СБП", short: "СБП", hint: "Система быстрых платежей: по QR-коду, деньги приходят сразу" },
+  bank: { label: "Перевод на банковский счёт", short: "перевод на банковский счёт", hint: "Безналичный расчёт по счёту, с закрывающими документами" },
+};
+function paymentText(list) {
+  const t = (list || []).filter((m) => PAYMENT[m]).map((m) => PAYMENT[m].short).join(", ");
+  return t ? t.charAt(0).toUpperCase() + t.slice(1) : null;
+}
+
+// Перевозчики — поставщики из категории «Грузоперевозки»
+const CARRIERS = DATA.suppliers.filter((x) => x.categories.includes("gruzoperevozki")).sort((a, b) => a.name.localeCompare(b.name, "ru"));
+/** Способ перевозки по выбору в форме: перевозчик задаёт его сам, доставка поставщика — отдельная машина */
+function deliveryMode(value) {
+  if (value && value.startsWith("carrier:")) return Delivery.carrierMode(value.slice(8));
+  return value === "supplier" ? "ftl" : null;
+}
+function deliveryLabel(value) {
+  if (value && value.startsWith("carrier:")) { const c = bySlug(value.slice(8)); return c ? c.name : null; }
+  return value === "supplier" ? "силами поставщика" : value === "pickup" ? "самовывоз со склада поставщика" : null;
+}
+
+/** Вес груза: из поля «Вес груза» или из «Объёма» («20 т», «500 кг») */
+function cargoWeightKg(weightText, quantityText) {
+  const typed = Number(String(weightText || "").replace(/\s/g, "").replace(",", "."));
+  return String(weightText || "").trim() && Number.isFinite(typed) && typed > 0 ? typed : Delivery.weightFromQuantity(quantityText);
+}
+
+/** Пересчёт блока «Срок в пути» при вводе города, веса и выборе перевозчика */
+function updateDeliveryEstimate(form) {
+  const box = form.querySelector("#delivery-estimate");
+  if (!box) return;
+  const targets = (form.querySelector("[data-delivery]").dataset.delivery || "").split(",").filter(Boolean).map(bySlug).filter(Boolean);
+  const city = form.querySelector("#deliveryRegion").value;
+  const value = form.querySelector("#delivery").value;
+  const weightText = form.querySelector("#cargoWeight").value;
+  const quantityText = form.querySelector("#quantity").value;
+  const autoWeight = Delivery.weightFromQuantity(quantityText);
+  const weightKg = cargoWeightKg(weightText, quantityText);
+  // Подсказка под полем веса и серый образец в поле
+  const hintEl = form.querySelector("#cargoWeight-hint");
+  if (hintEl) hintEl.textContent = autoWeight && !weightText.trim() ? `Возьмём из объёма: ${autoWeight.toLocaleString("ru-RU")} кг` : "Нужен, чтобы оценить стоимость доставки";
+  form.querySelector("#cargoWeight").placeholder = autoWeight ? autoWeight.toLocaleString("ru-RU") : "Например, 500";
+
+  const match = Delivery.findCity(city);
+  const mode = deliveryMode(value);
+  const carrierSlug = value.startsWith("carrier:") ? value.slice(8) : null;
+  const showDays = mode && value !== "pickup";
+  let note = "";
+  if (!city.trim()) note = "Укажите город доставки — посчитаем, сколько заказ будет в пути от каждого поставщика.";
+  else if (!match) note = `Не нашли «${esc(city.trim())}» в справочнике городов. Укажите ближайший крупный город — срок посчитаем до него. Запрос можно отправить и так.`;
+  else if (!targets.length) note = "Срок доставки посчитаем, когда менеджер подберёт поставщиков под ваш запрос.";
+  else if (value === "pickup") note = "Самовывоз: заберёте заказ со склада поставщика сами, расстояние — в таблице ниже.";
+  else if (!mode) note = "Выберите, кто доставит, — покажем срок в пути для сборного груза или отдельной машины.";
+  const rows = match ? targets.map((t) => {
+    const est = Delivery.estimateDelivery(t.city, match.city, mode || "ftl");
+    const cost = est && mode ? Delivery.estimateCost({ roadKm: est.roadKm, mode, weightKg, carrierSlug }) : null;
+    return { t, est, cost };
+  }) : [];
+  const hint = rows.map((r) => (r.cost && r.cost.ok ? r.cost.hint : null)).find(Boolean);
+  const basis = rows.map((r) => (r.cost && r.cost.ok ? r.cost.basis : null)).find(Boolean);
+  // Заказ с доставкой: товар по рынку + самая дешёвая и самая дорогая доставка среди поставщиков
+  const goods = Prices.estimateGoods(form.querySelector("#title").value, form.querySelector("#quantity").value);
+  const costs = rows.filter((r) => r.cost && r.cost.ok).map((r) => r.cost);
+  const total = goods.ok && showDays && costs.length ? Prices.moneyRange(goods.low + Math.min(...costs.map((c) => c.low)), goods.high + Math.max(...costs.map((c) => c.high))) : null;
+  box.innerHTML = `<p class="font-semibold">Срок в пути${match ? ` до города ${esc(match.city)}` : ""}${showDays ? `: ${esc(value === "supplier" ? "доставка поставщика" : deliveryLabel(value))}, ${Delivery.MODE_LABEL[mode]}` : ""}</p>
+    ${match && match.viaRegion ? `<p class="mt-1 text-muted">Указан регион — считаем до его центра, ${esc(match.city)}.</p>` : ""}
+    ${note ? `<p class="mt-1 text-muted">${note}</p>` : ""}
+    ${rows.length ? `<div class="mt-3 overflow-x-auto"><table class="w-full text-left"><thead class="text-xs text-muted"><tr><th scope="col" class="py-1 pr-3 font-medium">Поставщик</th><th scope="col" class="hidden py-1 pr-3 font-medium sm:table-cell">Откуда</th><th scope="col" class="hidden py-1 pr-3 text-right font-medium sm:table-cell">≈ км</th>${showDays ? '<th scope="col" class="py-1 pr-3 text-right font-medium">В пути</th><th scope="col" class="py-1 text-right font-medium">Стоимость</th>' : ""}</tr></thead>
+      <tbody>${rows.map(({ t, est, cost }) => `<tr class="border-t border-line">
+        <td class="py-1.5 pr-3">${esc(t.name)}<span class="block text-xs text-muted sm:hidden">${esc(t.city)}${est ? `, ≈ ${est.roadKm.toLocaleString("ru-RU")} км` : ""}</span></td>
+        <td class="hidden py-1.5 pr-3 sm:table-cell">${esc(t.city)}</td><td class="tabular hidden py-1.5 pr-3 text-right sm:table-cell">${est ? est.roadKm.toLocaleString("ru-RU") : "—"}</td>
+        ${showDays ? `<td class="tabular py-1.5 pr-3 text-right font-semibold">${est ? Delivery.dayRange(est.minDays, est.maxDays) : "нет данных"}</td>
+        <td class="tabular py-1.5 text-right">${cost && cost.ok ? `<span class="font-semibold">${Delivery.costRange(cost.low, cost.high)}</span>` : `<span class="text-xs text-muted">${esc(cost ? cost.reason : "—")}</span>`}</td>` : ""}</tr>`).join("")}</tbody></table></div>` : ""}
+    ${rows.length && showDays ? `<div class="mt-2 space-y-1 text-xs text-muted">${hint ? `<p class="font-semibold text-ink">${esc(hint)}</p>` : ""}
+      ${total ? `<p class="text-sm text-ink"><span class="font-semibold">Заказ с доставкой: ${total}</span>${rows.length > 1 ? " — в зависимости от поставщика" : ""}</p>` : ""}
+      <p>Ориентировочно, не цена перевозчика. Срок — по расстоянию между городами, без времени на подготовку заказа. Стоимость — по рыночным ставкам (${Delivery.RATES_AS_OF})${basis ? `: ${esc(basis)}` : ""}, без страховки, погрузки и упаковки. Точную цену назовёт перевозчик.</p>
+      <details><summary class="cursor-pointer">Откуда ставки</summary><ul class="mt-1 list-disc pl-5">${Delivery.RATE_SOURCES.map((src) => `<li><a ${hrefAttr(src.url)} class="link" target="_blank" rel="noopener noreferrer">${esc(src.name)}</a></li>`).join("")}</ul></details></div>` : ""}`;
+}
+
+/**
+ * Примерная стоимость заказа: средняя рыночная цена × объём (src/lib/prices.ts).
+ * Цены — из открытых прайсов продавцов, а не от поставщиков каталога: их сумма придёт в КП.
+ */
+function updateOrderCost(form) {
+  const box = form.querySelector("#order-cost");
+  if (!box) return;
+  const title = form.querySelector("#title").value;
+  const g = Prices.estimateGoods(title, form.querySelector("#quantity").value);
+  const item = g.item;
+  let body;
+  if (g.ok) {
+    body = `<p class="text-lg font-semibold">${Prices.moneyRange(g.low, g.high)}${g.typical ? `<span class="text-sm font-normal text-muted"> · чаще всего ${Prices.moneyApprox(g.typical)}</span>` : ""}</p>
+      <p class="mt-1">${esc(item.name)}: ${Prices.unitPrice(item)} × ${Prices.qtyLabel(g.amount, item.unit)}${g.unit !== item.unit ? ` (${Prices.qtyLabel(g.qty, g.unit)})` : ""}${item.note ? `; ${esc(item.note)}` : ""}</p>`;
+  } else if (item && g.reason === "no-quantity") body = `<p>${esc(item.name)}: ${Prices.unitPrice(item)}. Укажите объём — посчитаем сумму.</p>`;
+  else if (item && g.reason === "unit") body = `<p>${esc(item.name)}: ${Prices.unitPrice(item)}. Укажите объём в «${Prices.UNIT_LABEL[item.unit]}»${g.unitLabel ? ` — «${esc(g.unitLabel)}» пересчитать не можем` : ""}.</p>`;
+  else if (title.trim().length >= 3) body = `<p>Для этого товара средних цен у нас пока нет — сумму назовут поставщики в КП. <span class="text-xs">Ориентир есть для: ${Prices.PRICE_ITEM_NAMES.join(", ")}.</span></p>`;
+  else body = "<p>Укажите товар и объём — покажем примерную стоимость по средним рыночным ценам.</p>";
+  box.innerHTML = `<p class="font-semibold">Примерная стоимость заказа</p><div class="mt-1">${body}</div>
+    ${item ? `<div class="mt-2 space-y-1 text-xs text-muted"><p>Ориентир по открытым прайсам продавцов (${Prices.PRICES_AS_OF}), с НДС, без доставки. Это не цена поставщиков каталога — точную сумму они назовут в КП.</p>
+      <details><summary class="cursor-pointer">Откуда цены</summary><ul class="mt-1 list-disc pl-5">${item.sources.map((src) => `<li><a ${hrefAttr(src.url)} class="link" target="_blank" rel="noopener noreferrer">${esc(src.name)}</a></li>`).join("")}</ul></details></div>` : ""}`;
+}
+
+/** Проверка формы — те же правила, что в src/lib/rfq.ts */
+function validateRfq(d) {
+  const e = {};
+  const t = (k) => (d[k] || "").trim();
+  if (t("title").length < 3) e.title = "Опишите, что нужно купить";
+  if (t("message").length < 10) e.message = "Добавьте подробности: требования к товару, доставке и оплате";
+  if (t("companyName").length < 2) e.companyName = "Укажите название компании";
+  if (t("contactName").length < 2) e.contactName = "Укажите имя";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t("email"))) e.email = "Проверьте адрес почты";
+  if (t("phone") && !/^[\d\s()+-]{6,}$/.test(t("phone"))) e.phone = "Телефон: цифры, пробелы, скобки и +";
+  if (t("inn") && !/^(\d{10}|\d{12})$/.test(t("inn"))) e.inn = "ИНН — 10 или 12 цифр";
+  if (t("deadline") && new Date(`${t("deadline")}T23:59:59`) < new Date()) e.deadline = "Дата уже прошла";
+  if (!d.consent) e.consent = "Без согласия мы не сможем передать запрос поставщику";
+  if (t("cargoWeight")) { const w = Number(t("cargoWeight").replace(/\s/g, "").replace(",", ".")); if (!Number.isFinite(w) || w <= 0) e.cargoWeight = "Вес — число в килограммах"; }
+  const dv = t("delivery");
+  if (dv && !(dv === "supplier" || dv === "pickup" || (dv.startsWith("carrier:") && CARRIERS.some((c) => c.slug === dv.slice(8))))) e.delivery = "Выберите способ доставки из списка";
+  if ((d.paymentMethods || []).some((m) => !PAYMENT[m])) e.paymentMethods = "Выберите способ оплаты из списка";
+  return e;
+}
+let lastPath = null; // предыдущий раздел — чтобы анимировать только переход между разделами
+
+function submitRfq(form) {
+  const fd = new FormData(form);
+  const d = Object.fromEntries(fd.entries());
+  d.paymentMethods = fd.getAll("paymentMethods"); // флажков может быть несколько
+  if (d.website) return; // ловушка для ботов
+  const errors = validateRfq(d);
+  form.querySelectorAll(".field-error").forEach((p) => { p.classList.add("hidden"); p.textContent = ""; });
+  form.querySelectorAll(".field").forEach((el) => { el.classList.remove("border-danger"); el.removeAttribute("aria-invalid"); });
+  const alert = form.querySelector("#rfq-alert");
+  const keys = Object.keys(errors);
+  if (keys.length) {
+    alert.textContent = "Проверьте отмеченные поля";
+    alert.classList.remove("hidden");
+    for (const k of keys) {
+      const p = form.querySelector(`#${k}-error`);
+      if (p) { p.textContent = errors[k]; p.classList.remove("hidden"); }
+      const el = form.querySelector(`#${k}`);
+      if (el) { el.setAttribute("aria-invalid", "true"); el.setAttribute("aria-describedby", `${k}-error`); if (el.classList.contains("field")) el.classList.add("border-danger"); }
+    }
+    form.querySelector(`#${keys[0]}`)?.focus();
+    return;
+  }
+  const targets = (d.supplierSlugs || "").split(",").filter(Boolean).map(bySlug).filter(Boolean);
+  const saved = load(RFQ_KEY);
+  const now = Date.now();
+  // Ответы (КП) не придумываются: в полной версии их вносит менеджер или сама компания
+  const items = (targets.length ? targets : [null]).map((t, i) => ({ number: saved.length + i + 1, slug: t ? t.slug : null, quote: null }));
+  save(RFQ_KEY, [...saved, ...items.map((it) => ({ ...d, number: it.number, supplierSlug: it.slug, createdAt: new Date(now).toISOString() }))]);
+  const token = newToken();
+  save(REQ_KEY, [{ token, paymentMethods: [...new Set(d.paymentMethods)], title: d.title.trim(), quantity: (d.quantity || "").trim(), deliveryRegion: (d.deliveryRegion || "").trim(), delivery: d.delivery || "", cargoWeightKg: Math.round(cargoWeightKg(d.cargoWeight, d.quantity) || 0) || null, deadline: d.deadline || "", createdAt: new Date(now).toISOString(), items }, ...get(REQ_KEY)].slice(0, 50));
+  refreshMarks();
+
+  const n = targets.length, single = n === 1 ? targets[0] : null;
+  const nums = items.map((it) => it.number);
+  const numText = nums.length > 1 ? `№${nums[0]}–${nums[nums.length - 1]}` : `№${nums[0]}`;
+  const text = single && !single.isClaimed ? `Менеджер площадки передаст его в «${esc(single.name)}».`
+    : single ? `«${esc(single.name)}» получит его и ответит.`
+    : n > 1 ? `Номера запросов ${numText}. Ответы поставщиков появятся в одной таблице — по мере того как они будут приходить.`
+    : "Менеджер площадки подберёт поставщиков и перешлёт им запрос.";
+  document.getElementById("rfq-box").innerHTML = `<div role="status" class="rounded-2xl border-2 border-ok bg-surface p-6">
+    <h2 class="text-xl font-semibold">${n > 1 ? `Черновик запроса сохранён ${n} ${plural(n, ["поставщику", "поставщикам", "поставщикам"])}` : `Черновик ${numText} сохранён`}</h2>
+    <p class="mt-2 max-w-[60ch]">${text} Ссылка на ответы сохранена в разделе «Запросы».</p>
+    <p class="mt-2 text-sm text-muted">Демо-версия: запрос сохранён только в этом браузере и никуда не отправляется.</p>
+    <div class="mt-4 flex flex-wrap gap-2"><a href="#/requests/${token}" class="btn-primary">Открыть ответы поставщиков</a><a href="#/search" class="btn-ghost">Найти ещё поставщиков</a></div></div>`;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function newToken() {
+  const a = new Uint8Array(12);
+  try { crypto.getRandomValues(a); } catch { for (let i = 0; i < a.length; i++) a[i] = Math.floor(Math.random() * 256); }
+  return Array.from(a, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// ── Мои запросы и ответы поставщиков ─────────────────────────
+function pageRequests() {
+  const list = get(REQ_KEY);
+  return `<div class="page max-w-3xl py-8">
+    <h1 class="text-2xl font-semibold sm:text-3xl">Мои запросы КП</h1>
+    <p class="mt-1 text-sm text-muted">Черновики в этом браузере. Поставщикам автоматически не отправляются.</p>
+    <div class="mt-6">${list.length ? `<ul class="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">${list.map((r) => {
+      const ans = r.items.filter((it) => it.quote && Date.parse(it.quote.receivedAt) <= Date.now()).length;
+      return `<li><a href="#/requests/${r.token}" class="flex flex-col gap-1 p-4 hover:bg-paper sm:flex-row sm:items-baseline sm:justify-between">
+        <span class="font-display font-semibold">${esc(r.title)}</span>
+        <span class="text-sm text-muted">ответили ${ans} из ${r.items.length}, ${fmtDateTime(r.createdAt)}</span></a></li>`;
+    }).join("")}</ul>` : `<div class="max-w-xl"><p>Пока нет отправленных запросов. Добавьте поставщиков в сравнение и нажмите «Запросить КП у всех» — их ответы соберутся в одну таблицу.</p>
+      <a href="#/search" class="btn-primary mt-4">Найти поставщиков</a></div>`}</div>
+  </div>`;
+}
+const fmtDateTime = (d) => new Date(d).toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+const QGRID = "lg:grid-cols-[minmax(0,1.4fr)_9rem_9rem_7rem_minmax(0,1fr)]";
+
+function pageRequest(token) {
+  const r = get(REQ_KEY).find((x) => x.token === token);
+  if (!r) return pageNotFound();
+  const now = Date.now();
+  const mode = deliveryMode(r.delivery);
+  const rows = r.items.map((it) => {
+    const s = it.slug ? bySlug(it.slug) : null;
+    return { ...it, s, q: it.quote && Date.parse(it.quote.receivedAt) <= now ? it.quote : null,
+      transit: s && mode && r.deliveryRegion ? Delivery.estimateDelivery(s.city, r.deliveryRegion, mode) : null };
+  }).map((x) => ({ ...x, shipping: x.transit ? Delivery.estimateCost({ roadKm: x.transit.roadKm, mode, weightKg: r.cargoWeightKg, carrierSlug: r.delivery && r.delivery.startsWith("carrier:") ? r.delivery.slice(8) : null }) : null }));
+  // Срок до закупщика: отгрузка + дни в пути (худший случай)
+  const totalDays = (x) => x.q.deliveryDays + (x.transit ? x.transit.maxDays : 0);
+  const deliveryCity = Delivery.findCity(r.deliveryRegion);
+  const answered = rows.filter((x) => x.q).sort((a, b) => a.q.price - b.q.price);
+  const waiting = rows.length - answered.length;
+  // Лучшая цена — среди одинаковых единиц измерения; лучший срок — среди всех ответов
+  const units = {}; answered.forEach((x) => { units[x.q.unit] = (units[x.q.unit] || 0) + 1; });
+  const mainUnit = Object.keys(units).sort((a, b) => units[b] - units[a])[0];
+  const comparable = answered.filter((x) => x.q.unit === mainUnit);
+  const cheapest = comparable.length > 1 ? comparable[0].number : null;
+  const fastest = answered.length > 1 ? answered.reduce((a, b) => (totalDays(b) < totalDays(a) ? b : a)).number : null;
+  const meta = [r.quantity, r.deliveryRegion && `город доставки: ${r.deliveryRegion}`, r.deadline && `нужно к ${fmtDate(r.deadline)}`].filter(Boolean).join(", ");
+  const row = (x) => {
+    const best = x.number === cheapest;
+    return `<li class="relative border-b border-line last:border-b-0 ${best ? "bg-signal-tint/60" : ""}">${best ? '<span aria-hidden="true" class="absolute inset-y-0 left-0 w-1 bg-petrol"></span>' : ""}
+      <div class="grid gap-3 px-4 py-4 sm:px-5 ${QGRID} lg:gap-5">
+        <div class="min-w-0"><p class="font-display text-base font-semibold">${x.s ? `<a href="#/s/${x.s.slug}" class="hover:text-petrol hover:underline">${esc(x.s.name)}</a>` : "Подбор поставщика площадкой"}</p>
+          <div class="mt-1 flex flex-wrap gap-1.5 text-xs"><span class="text-muted">Запрос №${x.number}${x.transit ? ` · из города ${esc(x.transit.from)}, ≈ ${x.transit.roadKm.toLocaleString("ru-RU")} км` : ""}</span>
+            ${best ? '<span class="rounded-full bg-signal px-1.5 py-0.5 font-semibold text-ink">Ниже всех по цене</span>' : ""}
+            ${x.number === fastest ? '<span class="rounded-full bg-ok/10 px-1.5 py-0.5 font-semibold text-ok">Быстрее всех</span>' : ""}
+            ${x.q?.isExample ? '<span class="rounded-full border border-signal-dark px-1.5 py-0.5 font-semibold text-ink">Пример</span>' : ""}</div></div>
+        ${x.q ? `<dl class="contents">
+          <div><dt class="text-xs text-muted lg:sr-only">Цена за единицу</dt><dd class="tabular font-semibold">${rub(x.q.price)} <span class="font-normal text-muted">/ ${esc(x.q.unit)}</span></dd></div>
+          <div><dt class="text-xs text-muted lg:sr-only">Сумма</dt><dd class="tabular">${x.q.total !== null ? rub(x.q.total) : '<span class="text-muted">не указана</span>'}</dd>
+            ${x.shipping && x.shipping.ok ? `<dd class="tabular mt-0.5 text-xs text-muted">доставка ${Delivery.costRange(x.shipping.low, x.shipping.high)}</dd>${x.q.total !== null ? `<dd class="tabular mt-0.5 text-xs font-semibold">с доставкой ${Delivery.costRange(x.q.total + x.shipping.low, x.q.total + x.shipping.high)}</dd>` : ""}` : ""}</div>
+          <div><dt class="text-xs text-muted lg:sr-only">Срок до вас</dt>${x.transit
+            ? `<dd class="tabular font-semibold">${Delivery.dayRange(x.q.deliveryDays + x.transit.minDays, x.q.deliveryDays + x.transit.maxDays)}</dd><dd class="mt-0.5 text-xs text-muted">отгрузка ${Delivery.dayRange(x.q.deliveryDays, x.q.deliveryDays)} + в пути ${Delivery.dayRange(x.transit.minDays, x.transit.maxDays)}</dd>`
+            : `<dd class="tabular">отгрузка ${Delivery.dayRange(x.q.deliveryDays, x.q.deliveryDays)}</dd>`}</div>
+          <div class="min-w-0 text-sm"><dt class="text-xs text-muted lg:sr-only">Оплата и условия</dt><dd>${esc(x.q.paymentTerms || "—")}</dd>
+            <dd class="mt-0.5 text-xs text-muted">Действует до ${fmtDate(x.q.validUntil)}</dd><dd class="mt-1 text-xs text-muted">${esc(x.q.comment)}</dd></div>
+        </dl>` : `<div class="text-sm text-muted lg:col-span-4 lg:self-center"><p>${x.s && !x.s.isClaimed ? "Компания не подключена к площадке — менеджер передал ей запрос и внесёт ответ сюда."
+            : x.s && x.quote ? "Ждём ответа поставщика…" : x.s ? "Поставщик пока не ответил." : "Менеджер подбирает поставщиков под ваш запрос."}</p>
+            ${x.transit ? `<p class="mt-0.5 text-xs">Из города ${esc(x.transit.from)}: ≈ ${x.transit.roadKm.toLocaleString("ru-RU")} км, в пути ${Delivery.dayRange(x.transit.minDays, x.transit.maxDays)}${x.shipping && x.shipping.ok ? `, доставка ${Delivery.costRange(x.shipping.low, x.shipping.high)}` : ""}</p>` : ""}</div>`}
+      </div></li>`;
+  };
+  return `<div class="page py-8">
+    <nav aria-label="Навигационная цепочка" class="text-sm text-muted"><a href="#/requests" class="hover:text-petrol hover:underline">Мои запросы</a></nav>
+    <h1 class="mt-2 text-2xl font-semibold sm:text-3xl">${esc(r.title)}</h1>
+    <p class="mt-1 text-muted">${meta ? `${esc(meta)}. ` : ""}Отправлено ${fmtDateTime(r.createdAt)}.</p>
+    ${r.delivery ? `<p class="mt-1 text-sm"><span class="text-muted">Доставка: </span>${r.delivery.startsWith("carrier:") && bySlug(r.delivery.slice(8))
+      ? `<a href="#/s/${r.delivery.slice(8)}" class="link">${esc(bySlug(r.delivery.slice(8)).name)}</a>, ${Delivery.MODE_LABEL[mode]}` : esc(deliveryLabel(r.delivery) || "")}${deliveryCity && r.delivery !== "pickup" ? `<span class="text-muted"> · срок и стоимость доставки до города ${esc(deliveryCity.city)} — ориентировочно: по расстоянию и рыночным ставкам (${Delivery.RATES_AS_OF})${r.cargoWeightKg ? `, вес ${r.cargoWeightKg.toLocaleString("ru-RU")} кг` : ", вес не указан — стоимость не посчитана"}</span>` : ""}</p>` : ""}
+    ${paymentText(r.paymentMethods) ? `<p class="mt-1 text-sm"><span class="text-muted">Оплата: </span>${esc(paymentText(r.paymentMethods))}</p>` : ""}
+    ${(() => {
+      const g = Prices.estimateGoods(r.title, r.quantity);
+      return g.ok ? `<div class="mt-4 max-w-[70ch] rounded-xl border border-line-strong bg-signal-tint/40 p-3 text-sm">
+        <p><span class="font-semibold">Примерная стоимость заказа: ${Prices.moneyRange(g.low, g.high)}</span>${g.typical ? `<span class="text-muted"> · чаще всего ${Prices.moneyApprox(g.typical)}</span>` : ""}</p>
+        <p class="mt-0.5 text-xs text-muted">${esc(g.item.name)}: ${Prices.unitPrice(g.item)} × ${Prices.qtyLabel(g.amount, g.item.unit)}. Ориентир по открытым прайсам продавцов (${Prices.PRICES_AS_OF}), с НДС и без доставки — сравните с ним присланные КП.</p></div>` : "";
+    })()}
+    <p class="mt-5 font-display text-lg font-semibold" aria-live="polite">${answered.length} из ${rows.length} ${plural(rows.length, ["поставщика", "поставщиков", "поставщиков"])} прислали КП${waiting ? `<span class="font-sans text-base font-normal text-muted"> · ждём ответа ещё от ${waiting}</span>` : ""}</p>
+    ${answered.some((x) => x.q.isExample) ? `<p class="mt-2 max-w-[70ch] rounded-xl border border-signal-dark bg-signal-tint p-3 text-sm">Демо-режим: ответы с пометкой «Пример» сформированы по каталогу демо-поставщика, чтобы показать, как будет выглядеть сравнение. Это не настоящие предложения.</p>` : ""}
+    <div class="mt-5 overflow-hidden rounded-2xl border border-line bg-surface">
+      <div aria-hidden="true" class="hidden border-b border-line-strong bg-paper/60 px-5 py-2 text-xs font-medium text-muted lg:grid ${QGRID} lg:gap-5"><span>Поставщик</span><span>Цена за единицу</span><span>Сумма</span><span>Срок до вас</span><span>Оплата и условия</span></div>
+      <ul>${[...answered, ...rows.filter((x) => !x.q)].map(row).join("")}</ul>
+    </div>
+    <p class="mt-4 max-w-[70ch] text-sm text-muted">Цены без НДС. Ответы появляются здесь по мере поступления — страница обновляется сама.</p>
+    <div class="mt-5"><a href="#/search" class="btn-ghost">Найти ещё поставщиков</a></div>
+  </div>`;
+}
+
+/** Когда на странице ответов «придёт» следующий пример — перерисовать её */
+let answersTimer = null;
+function scheduleAnswers(path) {
+  clearTimeout(answersTimer);
+  if (!path.startsWith("/requests/")) return;
+  const r = get(REQ_KEY).find((x) => x.token === path.slice(10));
+  const next = r ? r.items.map((it) => it.quote && Date.parse(it.quote.receivedAt)).filter((t) => t && t > Date.now()).sort((a, b) => a - b)[0] : null;
+  if (next) answersTimer = setTimeout(() => { if (route().path === path) render(); }, next - Date.now() + 150);
+}
+
+function pageCompare() {
+  const items = get(CMP_KEY).map(bySlug).filter(Boolean).map((s) => ({ ...s, priceFrom: priceFrom(s) }));
+  if (!items.length) return `<div class="page max-w-2xl py-12"><h1 class="text-2xl font-semibold">Сравнение поставщиков</h1>
+    <p class="mt-3">Здесь пока пусто. В результатах поиска нажмите «Сравнить» у двух–четырёх поставщиков, и их цены и условия появятся в одной таблице.</p>
+    <a href="#/search" class="btn-primary mt-6">Перейти к поиску</a></div>`;
+  // [название, как показать, есть ли данные] — строка видна, если данные есть хотя бы у одного поставщика
+  const rows = [
+    ["Чем занимается", (s) => `<span class="line-clamp-4">${esc(s.description)}</span>`, (s) => !!s.description],
+    ["Рейтинг", (s) => ratingHtml(s.rating, s.reviewsCount), (s) => s.reviewsCount > 0],
+    ["Цена от", (s) => (s.priceFrom ? `${rub(s.priceFrom.price)} / ${esc(s.priceFrom.unit)}` : "По запросу"), (s) => !!s.priceFrom],
+    ["Самая дешёвая позиция", (s) => esc(s.priceFrom?.productName ?? "—"), (s) => !!s.priceFrom],
+    ["Минимальный заказ", (s) => (s.minOrderRub ? `от ${rub(s.minOrderRub)}` : s.isClaimed ? "Нет" : "Не указан"), (s) => !!s.minOrderRub],
+    ["Где находится", (s) => `${place(s)}`, () => true],
+    ["Регионы доставки", (s) => esc(s.deliveryRegions.join(", ") || "—"), (s) => s.deliveryRegions.length > 0],
+    ["Оплата", (s) => esc(s.paymentTerms ?? "—"), (s) => !!s.paymentTerms],
+    ["Доставка", (s) => esc(s.deliveryTerms ?? "—"), (s) => !!s.deliveryTerms],
+    ["Категории", (s) => esc(leafCats(s).map((c) => c.name).join(", ") || "—"), () => true],
+    ["Компания из справочника", (s) => (s.majorNote ? `${trustedHtml(s.majorNote)}<span class="mt-1 block text-xs text-muted">${esc(s.majorNote)}</span>` : "—"), (s) => !!s.majorNote],
+    ["Документы", (s) => (s.verified ? verifiedHtml() : '<span class="text-muted">Не проверены</span>'), (s) => s.verified],
+    ["На площадке", (s) => (s.isClaimed ? "Подтвердил размещение" : '<span class="text-muted">Данные из открытых источников</span>'), () => true],
+    ["На рынке с", (s) => (s.foundedYear ? `${s.foundedYear} года` : "—"), (s) => !!s.foundedYear],
+    ["Сайт", (s) => (s.website ? `<a ${hrefAttr(s.website)} target="_blank" rel="noopener noreferrer" class="text-petrol underline">${esc(s.website.replace(/^https?:\/\//, "").replace(/\/$/, ""))}</a>` : "—"), (s) => !!s.website],
+  ].filter(([, , has]) => items.some(has));
+  return `<div class="page py-8">
+    <h1 class="text-2xl font-semibold sm:text-3xl">Сравнение поставщиков</h1>
+    <p class="mt-1 text-sm text-muted">Можно сравнить до ${COMPARE_LIMIT} поставщиков. На телефоне таблицу можно прокрутить вбок.</p>
+    <div class="mt-5 flex flex-col gap-3 rounded-2xl bg-petrol-tint p-5 sm:flex-row sm:items-center sm:justify-between">
+      <p class="max-w-[56ch] text-sm">Отправьте один запрос всем ${items.length} ${plural(items.length, ["поставщику", "поставщикам", "поставщикам"])} — их предложения соберутся в одну таблицу с ценой, сроком и условиями.</p>
+      <a href="#/rfq?suppliers=${items.map((x) => x.slug).join(",")}" class="btn-primary shrink-0">Запросить КП у всех (${items.length})</a>
+    </div>
+    <div class="mt-6 overflow-x-auto rounded-2xl border border-line bg-surface"><table class="w-full min-w-[40rem] border-collapse text-sm">
+      <thead><tr><th scope="col" class="sticky left-0 z-10 w-40 bg-surface p-4 text-left align-bottom"><span class="sr-only">Параметр</span></th>
+        ${items.map((s) => `<th scope="col" class="min-w-[12rem] border-l border-line p-4 text-left align-top">
+          <span class="block h-1 w-10 rounded-full bg-petrol" aria-hidden="true"></span>
+          <a href="#/s/${s.slug}" class="mt-2 block font-display text-base font-semibold hover:text-petrol hover:underline">${esc(s.name)}</a>
+          <div class="mt-3 flex flex-wrap gap-2"><a href="#/rfq?supplier=${s.slug}" class="btn-primary min-h-9 px-3 py-1.5 text-xs">Запросить КП</a>
+            <button type="button" data-remove="${s.slug}" class="btn-ghost min-h-9 px-3 py-1.5 text-xs">Убрать</button></div></th>`).join("")}</tr></thead>
+      <tbody>${rows.map(([label, render]) => `<tr class="border-t border-line"><th scope="row" class="sticky left-0 z-10 bg-surface p-4 text-left align-top font-medium text-muted">${label}</th>
+        ${items.map((s) => `<td class="border-l border-line p-4 align-top">${render(s)}</td>`).join("")}</tr>`).join("")}</tbody>
+    </table></div>
+    <a href="#/search" class="btn-ghost mt-6">Добавить ещё поставщиков</a>
+  </div>`;
+}
+
+function pageFavorites() {
+  const items = get(FAV_KEY).map(bySlug).filter(Boolean);
+  return `<div class="page py-8">
+    <h1 class="text-2xl font-semibold sm:text-3xl">Избранные поставщики</h1>
+    <p class="mt-1 text-sm text-muted">Список хранится в этом браузере. На другом устройстве его не будет.</p>
+    <div class="mt-6">${items.length ? `<ul class="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">${items.map((s) => {
+      const pf = priceFrom(s);
+      return `<li class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><a href="#/s/${s.slug}" class="font-display text-lg font-semibold hover:text-petrol hover:underline">${esc(s.name)}</a>${badgesHtml(s)}</div>
+          <p class="text-sm text-muted">${place(s)}${pf ? `, цена от ${rub(pf.price)} / ${esc(pf.unit)}` : ""}</p>
+          <div class="mt-1">${ratingHtml(s.rating, s.reviewsCount)}</div></div>
+        <div class="flex flex-wrap gap-2"><a href="#/rfq?supplier=${s.slug}" class="btn-primary">Запросить КП</a>${actionsHtml(s)}</div></li>`;
+    }).join("")}</ul>` : `<div class="max-w-xl"><p>Пока пусто. Нажмите «В избранное» в карточке поставщика или в результатах поиска, чтобы вернуться к нему позже.</p>
+      <a href="#/search" class="btn-primary mt-4">Найти поставщиков</a></div>`}</div>
+  </div>`;
+}
+
+function pageForSuppliers() {
+  const body = encodeURIComponent("Компания:\nИНН:\nРегион и город:\nКатегории товаров:\nРегионы доставки:\nМинимальный заказ:\nКонтактное лицо и телефон:\nСайт:\n\nПрайс-лист приложите файлом (Excel или CSV).");
+  return `<div class="page max-w-3xl py-10">
+    <h1 class="text-2xl font-semibold sm:text-3xl">Разместите компанию на Supply Matchе</h1>
+    <p class="mt-3 max-w-[65ch]">Закупщики находят поставщиков по товару и региону и отправляют запросы коммерческого предложения. Размещение бесплатное. Запросы приходят на почту отдела продаж.</p>
+    <h2 class="mt-8 text-xl font-semibold">Как попасть в каталог</h2>
+    <ol class="mt-4 space-y-4">${[["Отправьте заявку", "Реквизиты, категории товаров, регионы доставки и прайс-лист в Excel или CSV."],
+      ["Пройдите проверку", "Модератор сверит компанию по ИНН и опубликует карточку, обычно за один рабочий день."],
+      ["Получайте запросы", "Запросы КП от закупщиков будут приходить на почту, ответ уходит напрямую клиенту."]]
+      .map(([t, d], i) => `<li class="flex gap-4"><span class="tabular flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-signal font-display text-sm font-semibold">${i + 1}</span><div><h3 class="font-sans font-semibold">${t}</h3><p class="text-sm text-muted">${d}</p></div></li>`).join("")}</ol>
+    <a href="mailto:hello@example.com?subject=${encodeURIComponent("Заявка на размещение поставщика")}&body=${body}" class="btn-primary mt-8 px-6 text-base">Отправить заявку</a>
+    <p class="mt-2 text-sm text-muted">Откроется почтовая программа с готовым шаблоном письма на hello@example.com.</p>
+  </div>`;
+}
+
+const pagePrivacy = () => `<div class="page max-w-3xl py-10"><h1 class="text-2xl font-semibold">Обработка персональных данных</h1>
+  <div class="mt-4 max-w-[70ch] space-y-3">
+    <p class="rounded-xl border border-signal-dark bg-signal-tint p-3 text-sm">Это демонстрационный текст. До публичного запуска его нужно заменить на политику обработки персональных данных вашей компании.</p>
+    <p>Отправляя запрос коммерческого предложения, вы передаёте Supply Matchу название компании, ИНН, имя, адрес почты и телефон. Мы используем их только для того, чтобы передать запрос выбранному поставщику и связаться с вами по этому запросу.</p>
+    <p>Чтобы отозвать согласие или удалить данные, напишите на <a href="mailto:hello@example.com" class="link">hello@example.com</a>.</p>
+  </div></div>`;
+
+const pageNotFound = () => `<div class="page max-w-2xl py-16"><h1 class="text-2xl font-semibold">Страница не найдена</h1>
+  <p class="mt-3">Возможно, поставщик убрал карточку или в адресе опечатка. Попробуйте найти его через поиск.</p>
+  <a href="#/search" class="btn-primary mt-6">Перейти к поиску</a></div>`;
+
+// ── Состояние кнопок, счётчики, плашка сравнения ─────────────
+function refreshMarks() {
+  const fav = get(FAV_KEY), cmp = get(CMP_KEY);
+  document.querySelectorAll("[data-fav]").forEach((b) => {
+    const on = fav.includes(b.dataset.fav);
+    b.setAttribute("aria-pressed", on);
+    b.classList.toggle("border-ink", on);
+    b.querySelector("path").setAttribute("fill", on ? "#111827" : "none");
+    b.querySelector("span").textContent = on ? "В избранном" : "В избранное";
+  });
+  document.querySelectorAll("[data-cmp]").forEach((b) => {
+    const on = cmp.includes(b.dataset.cmp);
+    b.setAttribute("aria-pressed", on);
+    b.classList.toggle("border-ink", on);
+    b.classList.toggle("bg-signal-tint", on);
+    const box = b.querySelector(".cmp-box");
+    box.classList.toggle("bg-signal", on); box.classList.toggle("border-ink", on); box.classList.toggle("border-line-strong", !on);
+    box.innerHTML = on ? '<svg viewBox="0 0 12 12" class="h-3 w-3"><path d="M2.5 6.5l2 2 5-5" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round"/></svg>' : "";
+  });
+  document.querySelectorAll("[data-stripe]").forEach((el) => el.classList.toggle("hidden", !cmp.includes(el.dataset.stripe)));
+  for (const [id, n] of [["fav-count", fav.length], ["cmp-count", cmp.length], ["req-count", get(REQ_KEY).length]]) {
+    const el = document.getElementById(id); el.textContent = n; el.classList.toggle("hidden", !n);
+  }
+  // Плашка внизу: не показываем на странице сравнения и (на телефоне) в карточке поставщика
+  const path = route().path;
+  const bar = document.getElementById("compare-bar");
+  if (!cmp.length || path === "/compare") { bar.innerHTML = ""; return; }
+  bar.innerHTML = `<div class="${path.startsWith("/s/") ? "hidden lg:block" : ""}"><div aria-hidden="true" class="h-16"></div>
+    <div class="fixed inset-x-0 bottom-0 z-30 bg-ink text-white shadow-lift" role="region" aria-label="Сравнение поставщиков">
+      <div class="page flex items-center justify-between gap-3 py-2.5">
+        <p class="text-sm">В сравнении ${cmp.length} ${plural(cmp.length, ["поставщик", "поставщика", "поставщиков"])}<span class="hidden text-white/70 sm:inline"> из ${COMPARE_LIMIT} возможных</span></p>
+        <div class="flex items-center gap-2"><button type="button" data-clear class="btn px-3 text-white/80 hover:text-white">Очистить</button><a href="#/compare" class="btn bg-surface text-ink hover:bg-petrol-tint">Сравнить</a></div>
+      </div></div></div>`;
+}
+
+// ── Маршрутизация по адресу после # ──────────────────────────
+function route() {
+  const [path, qs] = (location.hash.slice(1) || "/").split("?");
+  return { path: path || "/", sp: new URLSearchParams(qs || "") };
+}
+function render() {
+  const { path, sp } = route();
+  const app = document.getElementById("app");
+  let html, title = "Supply Match — поиск поставщиков для бизнеса";
+  if (path === "/") html = pageHome();
+  else if (path === "/search") { html = pageSearch(sp); title = "Поиск поставщиков — Supply Match"; }
+  else if (path.startsWith("/s/")) { const s = bySlug(decodeURIComponent(path.slice(3))); html = pageSupplier(decodeURIComponent(path.slice(3))); if (s) title = `${s.name}, ${s.city} — Supply Match`; }
+  else if (path === "/rfq") { html = pageRfq(sp); title = "Запрос коммерческого предложения — Supply Match"; }
+  else if (path === "/compare") { html = pageCompare(); title = "Сравнение поставщиков — Supply Match"; }
+  else if (path === "/favorites") { html = pageFavorites(); title = "Избранные поставщики — Supply Match"; }
+  else if (path === "/requests") { html = pageRequests(); title = "Мои запросы КП — Supply Match"; }
+  else if (path.startsWith("/requests/")) { html = pageRequest(path.slice(10)); title = "Ответы поставщиков — Supply Match"; }
+  else if (path === "/for-suppliers") html = pageForSuppliers();
+  else if (path === "/privacy") html = pagePrivacy();
+  else html = pageNotFound();
+  app.innerHTML = html;
+  document.title = title;
+  if (path !== lastPath) {
+    app.classList.remove("page-enter");
+    void app.offsetWidth; // перезапуск анимации
+    app.classList.add("page-enter");
+    lastPath = path;
+  }
+  // Поиск в шапке прячем на странице поиска — там своё поле вместе с фильтрами
+  document.getElementById("header-search").classList.toggle("hidden", path === "/search");
+  // Подсвечиваем текущую вкладку меню
+  document.querySelectorAll("[data-tab]").forEach((a) => {
+    const t = a.dataset.tab;
+    if (path === t || path.startsWith(`${t}/`)) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+  });
+  refreshMarks();
+  scheduleAnswers(path);
+  const rfqForm = app.querySelector("form[data-rfq]");
+  if (rfqForm) { updateOrderCost(rfqForm); updateDeliveryEstimate(rfqForm); }
+}
+
+// ── События (делегирование на весь документ) ─────────────────
+document.addEventListener("submit", (e) => {
+  const form = e.target;
+  if (form.dataset.rfq !== undefined) { e.preventDefault(); submitRfq(form); return; }
+  if (!form.dataset.route) return;
+  e.preventDefault();
+  const params = new URLSearchParams();
+  for (const [k, v] of new FormData(form).entries()) if (String(v).trim() !== "") params.set(k, String(v).trim());
+  params.delete("page"); // новый поиск — с первой страницы
+  const qs = params.toString();
+  location.hash = `#${form.dataset.route}${qs ? `?${qs}` : ""}`;
+});
+document.addEventListener("input", (e) => {
+  const form = e.target.closest && e.target.closest("form[data-rfq]");
+  if (form && ["title", "quantity"].includes(e.target.id)) updateOrderCost(form);
+  if (form && ["deliveryRegion", "delivery", "cargoWeight", "quantity", "title"].includes(e.target.id)) updateDeliveryEstimate(form);
+});
+document.addEventListener("change", (e) => {
+  const form = e.target.closest && e.target.closest("form[data-rfq]");
+  if (form && (e.target.id === "deliveryRegion" || e.target.id === "delivery")) updateDeliveryEstimate(form);
+  if (e.target.matches("[data-autosubmit]")) e.target.form.requestSubmit();
+});
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-skip]")) { e.preventDefault(); document.getElementById("app").focus(); return; }
+  const fav = e.target.closest("[data-fav]");
+  if (fav) { toggleFav(fav.dataset.fav); if (route().path === "/favorites") render(); return; }
+  const cmp = e.target.closest("[data-cmp]");
+  if (cmp) {
+    const ok = toggleCmp(cmp.dataset.cmp);
+    const notice = cmp.parentElement.querySelector(".cmp-notice");
+    notice.textContent = ok ? "" : `В сравнении уже ${COMPARE_LIMIT} поставщика. Уберите одного, чтобы добавить «${cmp.dataset.name}».`;
+    notice.classList.toggle("hidden", ok);
+    return;
+  }
+  const rm = e.target.closest("[data-remove]");
+  if (rm) { toggleCmp(rm.dataset.remove); render(); return; }
+  if (e.target.closest("[data-clear]")) { save(CMP_KEY, []); refreshMarks(); return; }
+  const ft = e.target.closest("#filters-toggle");
+  if (ft) {
+    const open = ft.getAttribute("aria-expanded") !== "true";
+    ft.setAttribute("aria-expanded", open);
+    ft.lastElementChild.textContent = open ? "Скрыть" : "Показать";
+    document.getElementById("filters").classList.toggle("hidden", !open);
+    document.getElementById("filters").classList.toggle("mt-3", open);
+  }
+});
+window.addEventListener("hashchange", () => { render(); window.scrollTo(0, 0); });
+window.addEventListener("storage", () => { for (const k of [FAV_KEY, CMP_KEY, REQ_KEY]) memory[k] = load(k); refreshMarks(); });
+render();
+const help=document.createElement('details');help.className='page';help.style.padding='22px';help.innerHTML='<summary>Как работает подбор</summary><p>Поиск идёт по встроенному справочнику. Небольшая нейросеть обучается на его категориях прямо в браузере. Это экспериментальная модель классификации, не ChatGPT и не поиск новых компаний в интернете.</p><form data-hixo="off"><label>Опишите товар<input class="field" name="query" required maxlength="300" placeholder="Например: упаковка для магазина"></label><button class="btn-primary">Определить категорию</button><p role="status"></p></form>';document.body.append(help);help.querySelector('form').addEventListener('submit',e=>{e.preventDefault();const q=new FormData(e.target).get('query');const top=Object.entries(CategoryNet.scores(q)).sort((a,b)=>b[1]-a[1]).slice(0,3);help.querySelector('[role="status"]').textContent='Возможные категории: '+top.map(([c])=>CAT[c]?.name||c).join(', ')+'. Проверьте выбор: модель обучена только на небольшом каталоге.';});
+</script>
+</body>
+</html>
